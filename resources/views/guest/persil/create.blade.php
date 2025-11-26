@@ -42,56 +42,99 @@
         @endif
 
         <div class="form-container">
-            <form action="{{ route('guest.persil.store') }}" method="POST">
+            <form action="{{ route('guest.persil.store') }}" method="POST" enctype="multipart/form-data" id="create-persil-form">
                 @csrf
+
+                <h3 style="margin-bottom: 1.5em; color: #2ebaae; border-bottom: 2px solid #2ebaae; padding-bottom: 0.5em;">📋 Data Persil</h3>
 
                 <div class="form-group">
                     <label for="kode_persil">Kode Persil <span style="color: red;">*</span></label>
                     <input type="text" id="kode_persil" name="kode_persil" value="{{ old('kode_persil') }}" required>
-                    @error('kode_persil')
-                    <small style="color: red;">{{ $message }}</small>
-                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="pemilik_warga_id">Pemilik Persil</label>
+                    <select id="pemilik_warga_id" name="pemilik_warga_id">
+                        <option value="" data-photo="">-- Pilih Pemilik (Opsional) --</option>
+                        @foreach($users as $user)
+                        <option value="{{ $user->id }}"
+                                data-photo="{{ $user->photo_path ? asset('storage/' . $user->photo_path) : '' }}"
+                                data-name="{{ $user->name }}"
+                                {{ old('pemilik_warga_id') == $user->id ? 'selected' : '' }}>
+                            {{ $user->name }}
+                        </option>
+                        @endforeach
+                    </select>
+
+                    <!-- Owner Photo Preview -->
+                    <div id="owner-photo-preview" class="owner-preview" style="display: none;">
+                        <div class="preview-container">
+                            <img src="" alt="" class="preview-photo" id="preview-photo" style="display: none;">
+                            <div class="preview-avatar" id="preview-avatar" style="display: none;"></div>
+                            <div class="preview-info">
+                                <small>Foto Profil Pemilik</small>
+                                <strong id="preview-name"></strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Foto Pemilik -->
+                    <div id="owner-photo-upload" class="owner-photo-upload" style="display: none;">
+                        <label for="owner_photo">Upload/Ganti Foto Pemilik (Opsional)</label>
+                        <input type="file" id="owner_photo" name="owner_photo" accept="image/jpeg,image/png,image/jpg">
+                        <small style="color: #666; display: block; margin-top: 0.5em;">Format: JPG, PNG (Max 2MB)</small>
+
+                        <!-- Preview foto yang akan diupload -->
+                        <div id="new-photo-preview" style="display: none; margin-top: 1em;">
+                            <p style="font-weight: 600; color: #2ebaae; margin-bottom: 0.5em;">Preview Foto Baru:</p>
+                            <img id="new-photo-img" src="" alt="" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #2ebaae;">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="luas_m2">Luas (m²)</label>
                     <input type="number" id="luas_m2" name="luas_m2" step="0.01" min="0" value="{{ old('luas_m2') }}">
-                    @error('luas_m2')
-                    <small style="color: red;">{{ $message }}</small>
-                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="penggunaan">Penggunaan Lahan</label>
                     <input type="text" id="penggunaan" name="penggunaan" value="{{ old('penggunaan') }}" placeholder="Contoh: Pertanian, Perumahan, dll">
-                    @error('penggunaan')
-                    <small style="color: red;">{{ $message }}</small>
-                    @enderror
                 </div>
 
                 <div class="form-group">
                     <label for="alamat_lahan">Alamat Lahan</label>
                     <textarea id="alamat_lahan" name="alamat_lahan" rows="3">{{ old('alamat_lahan') }}</textarea>
-                    @error('alamat_lahan')
-                    <small style="color: red;">{{ $message }}</small>
-                    @enderror
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="rt">RT</label>
                         <input type="text" id="rt" name="rt" value="{{ old('rt') }}" maxlength="5" placeholder="001">
-                        @error('rt')
-                        <small style="color: red;">{{ $message }}</small>
-                        @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="rw">RW</label>
                         <input type="text" id="rw" name="rw" value="{{ old('rw') }}" maxlength="5" placeholder="001">
-                        @error('rw')
-                        <small style="color: red;">{{ $message }}</small>
-                        @enderror
+                    </div>
+                </div>
+
+                <!-- Multi Upload Dokumen Section -->
+                <h3 style="margin: 2em 0 1.5em 0; color: #2ebaae; border-bottom: 2px solid #2ebaae; padding-bottom: 0.5em;">📁 Upload Dokumen (Opsional)</h3>
+
+                <div class="upload-section">
+                    <div class="file-drop-zone" id="dropZoneCreate">
+                        <input type="file" name="files[]" id="filesCreate" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+                        <div class="drop-zone-content">
+                            <span class="upload-icon">📁</span>
+                            <h4>Drag & Drop files atau klik untuk memilih</h4>
+                            <p>Format: PDF, DOC, DOCX, JPG, PNG (Max 5MB per file)</p>
+                            <button type="button" class="button special" onclick="document.getElementById('filesCreate').click()">Pilih File</button>
+                        </div>
+                    </div>
+
+                    <div id="files-preview-create" class="files-preview" style="display: none;">
+                        <!-- File items will be added here dynamically -->
                     </div>
                 </div>
 
@@ -103,17 +146,184 @@
         </div>
     </div>
 </section>
+
+<script>
+// Owner Photo Preview Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const ownerSelect = document.getElementById('pemilik_warga_id');
+    const ownerPreview = document.getElementById('owner-photo-preview');
+    const previewPhoto = document.getElementById('preview-photo');
+    const previewAvatar = document.getElementById('preview-avatar');
+    const previewName = document.getElementById('preview-name');
+    const ownerPhotoUpload = document.getElementById('owner-photo-upload');
+    const ownerPhotoInput = document.getElementById('owner_photo');
+    const newPhotoPreview = document.getElementById('new-photo-preview');
+    const newPhotoImg = document.getElementById('new-photo-img');
+
+    if (ownerSelect) {
+        ownerSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const photoUrl = selectedOption.getAttribute('data-photo');
+            const ownerName = selectedOption.getAttribute('data-name');
+
+            if (this.value && ownerName) {
+                ownerPreview.style.display = 'flex';
+                ownerPhotoUpload.style.display = 'block';
+                previewName.textContent = ownerName;
+
+                if (photoUrl) {
+                    previewPhoto.src = photoUrl;
+                    previewPhoto.alt = ownerName;
+                    previewPhoto.style.display = 'block';
+                    previewAvatar.style.display = 'none';
+                } else {
+                    previewPhoto.style.display = 'none';
+                    previewAvatar.style.display = 'flex';
+                    previewAvatar.textContent = ownerName.charAt(0).toUpperCase();
+                }
+            } else {
+                ownerPreview.style.display = 'none';
+                ownerPhotoUpload.style.display = 'none';
+                newPhotoPreview.style.display = 'none';
+                ownerPhotoInput.value = '';
+            }
+        });
+    }
+
+    // Handle new photo upload preview
+    if (ownerPhotoInput) {
+        ownerPhotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file size (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file terlalu besar! Maksimal 2MB');
+                    this.value = '';
+                    newPhotoPreview.style.display = 'none';
+                    return;
+                }
+
+                // Validate file type
+                if (!file.type.match('image/(jpeg|jpg|png)')) {
+                    alert('Format file tidak didukung! Gunakan JPG atau PNG');
+                    this.value = '';
+                    newPhotoPreview.style.display = 'none';
+                    return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newPhotoImg.src = e.target.result;
+                    newPhotoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                newPhotoPreview.style.display = 'none';
+            }
+        });
+    }
+});
+
+// Multi File Upload for Create Form
+const fileInputCreate = document.getElementById('filesCreate');
+const dropZoneCreate = document.getElementById('dropZoneCreate');
+const filesPreviewCreate = document.getElementById('files-preview-create');
+let selectedFilesCreate = [];
+
+fileInputCreate.addEventListener('change', handleFilesCreate);
+
+dropZoneCreate.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZoneCreate.classList.add('drag-over');
+});
+
+dropZoneCreate.addEventListener('dragleave', () => {
+    dropZoneCreate.classList.remove('drag-over');
+});
+
+dropZoneCreate.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZoneCreate.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    fileInputCreate.files = files;
+    handleFilesCreate();
+});
+
+function handleFilesCreate() {
+    selectedFilesCreate = Array.from(fileInputCreate.files);
+    displayFilesCreate();
+}
+
+function displayFilesCreate() {
+    if (selectedFilesCreate.length === 0) {
+        filesPreviewCreate.style.display = 'none';
+        return;
+    }
+
+    filesPreviewCreate.style.display = 'block';
+    filesPreviewCreate.innerHTML = '';
+
+    selectedFilesCreate.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-preview-item';
+        fileItem.innerHTML = `
+            <span class="file-preview-icon">${getFileIconCreate(file.name)}</span>
+            <div class="file-preview-info">
+                <strong>${file.name}</strong>
+                <small>${formatFileSizeCreate(file.size)}</small>
+            </div>
+            <div class="file-preview-input">
+                <input type="text" name="jenis_dokumen[]" placeholder="Jenis Dokumen" required>
+            </div>
+            <button type="button" class="file-preview-remove" onclick="removeFileCreate(${index})">✕</button>
+        `;
+        filesPreviewCreate.appendChild(fileItem);
+    });
+}
+
+function getFileIconCreate(filename) {
+    const ext = filename.split('.').pop().toLowerCase();
+    const icons = {
+        'pdf': '📄',
+        'doc': '📝',
+        'docx': '📝',
+        'jpg': '🖼️',
+        'jpeg': '🖼️',
+        'png': '🖼️'
+    };
+    return icons[ext] || '📎';
+}
+
+function formatFileSizeCreate(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+function removeFileCreate(index) {
+    selectedFilesCreate.splice(index, 1);
+
+    const dataTransfer = new DataTransfer();
+    selectedFilesCreate.forEach(file => dataTransfer.items.add(file));
+    fileInputCreate.files = dataTransfer.files;
+
+    displayFilesCreate();
+}
+</script>
 @endsection
 
 @push('styles')
 <style>
     .form-container {
-        max-width: 800px;
+        max-width: 1000px;
         margin: 0 auto;
         background: #fff;
         padding: 2em;
-        border-radius: 5px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
     }
 
     .form-group {
@@ -123,7 +333,7 @@
     .form-group label {
         display: block;
         margin-bottom: 0.5em;
-        font-weight: bold;
+        font-weight: 700;
         color: #333;
     }
 
@@ -131,11 +341,12 @@
     .form-group textarea,
     .form-group select {
         width: 100%;
-        padding: 0.8em;
-        border: 1px solid #ddd;
-        border-radius: 5px;
+        padding: 0.9em 1.2em;
+        border: 2px solid #d0d0d0;
+        border-radius: 8px;
         font-size: 1em;
         font-family: inherit;
+        transition: all 0.3s ease;
     }
 
     .form-group input:focus,
@@ -143,7 +354,11 @@
     .form-group select:focus {
         outline: none;
         border-color: #2ebaae;
-        box-shadow: 0 0 5px rgba(46, 186, 174, 0.3);
+        box-shadow: 0 0 0 3px rgba(46, 186, 174, 0.1);
+    }
+
+    .form-group select {
+        cursor: pointer;
     }
 
     .form-row {
@@ -152,24 +367,249 @@
         gap: 1em;
     }
 
+    /* Upload Section Styles */
+    .upload-section {
+        margin: 2em 0;
+    }
+
+    .file-drop-zone {
+        border: 3px dashed #d0d0d0;
+        border-radius: 12px;
+        padding: 3em 2em;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .file-drop-zone:hover, .file-drop-zone.drag-over {
+        border-color: #2ebaae;
+        background: #e8f5f4;
+    }
+
+    .drop-zone-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+    }
+
+    .upload-icon {
+        font-size: 4em;
+    }
+
+    .drop-zone-content h4 {
+        margin: 0;
+        color: #333;
+        font-size: 1.2em;
+    }
+
+    .drop-zone-content p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    /* Files Preview */
+    .files-preview {
+        margin-top: 1.5em;
+        border: 2px solid #2ebaae;
+        border-radius: 12px;
+        padding: 1.5em;
+        background: #ffffff;
+    }
+
+    .file-preview-item {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        padding: 1em;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 0.8em;
+        transition: all 0.2s ease;
+    }
+
+    .file-preview-item:hover {
+        background: #e9ecef;
+    }
+
+    .file-preview-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .file-preview-icon {
+        font-size: 2em;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .file-preview-info {
+        flex: 1;
+    }
+
+    .file-preview-info strong {
+        display: block;
+        color: #333;
+        margin-bottom: 0.3em;
+    }
+
+    .file-preview-info small {
+        color: #666;
+    }
+
+    .file-preview-input {
+        flex: 1;
+        max-width: 300px;
+    }
+
+    .file-preview-input input {
+        width: 100%;
+        padding: 0.7em;
+        border: 1px solid #d0d0d0;
+        border-radius: 6px;
+        font-size: 0.9em;
+    }
+
+    .file-preview-remove {
+        background: #f44336;
+        color: white;
+        border: none;
+        padding: 0.6em 1em;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .file-preview-remove:hover {
+        background: #d32f2f;
+        transform: scale(1.05);
+    }
+
+    /* Owner Photo Preview Styling */
+    .owner-preview {
+        margin-top: 1em;
+        padding: 1.2em;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border: 2px solid #2ebaae;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .preview-container {
+        display: flex;
+        align-items: center;
+        gap: 1.2em;
+    }
+
+    .preview-photo {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #2ebaae;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .preview-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2ebaae 0%, #1fa99c 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8em;
+        font-weight: 700;
+        border: 3px solid #2ebaae;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .preview-info {
+        flex: 1;
+    }
+
+    .preview-info small {
+        display: block;
+        font-size: 0.75em;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        margin-bottom: 0.3em;
+    }
+
+    .preview-info strong {
+        display: block;
+        font-size: 1.1em;
+        color: #212529;
+        font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Owner Photo Upload Styling */
+    .owner-photo-upload {
+        margin-top: 1em;
+        padding: 1.2em;
+        background: #ffffff;
+        border-radius: 12px;
+        border: 2px dashed #2ebaae;
+    }
+
+    .owner-photo-upload label {
+        display: block;
+        margin-bottom: 0.8em;
+        font-weight: 700;
+        color: #2ebaae;
+    }
+
+    .owner-photo-upload input[type="file"] {
+        width: 100%;
+        padding: 0.8em;
+        border: 2px solid #d0d0d0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .owner-photo-upload input[type="file"]:hover {
+        border-color: #2ebaae;
+        background: #f8f9fa;
+    }
+
     .form-actions {
         margin-top: 2em;
+        padding-top: 2em;
+        border-top: 2px solid #e9ecef;
         text-align: center;
     }
 
     .form-actions button,
     .form-actions a {
         margin: 0 0.5em;
-    }
-
-    small {
-        display: block;
-        margin-top: 0.3em;
+        min-width: 150px;
     }
 
     @media (max-width: 768px) {
         .form-row {
             grid-template-columns: 1fr;
+        }
+
+        .form-container {
+            padding: 1.5em;
         }
     }
 </style>

@@ -13,14 +13,9 @@ class DokumenPersil extends Model
     protected $fillable = [
         'persil_id',
         'jenis_dokumen',
-        'nomor_dokumen',
-        'tanggal_dokumen',
+        'nomor',
         'file_path',
         'keterangan',
-    ];
-
-    protected $casts = [
-        'tanggal_dokumen' => 'date',
     ];
 
     public function persil(): BelongsTo

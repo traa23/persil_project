@@ -24,6 +24,7 @@ Route::prefix('guest')->name('guest.')->group(function () {
 
     // Other guest resources
     Route::resource('dokumen-persil', \App\Http\Controllers\DokumenPersilController::class);
+    Route::post('dokumen-persil/store-multiple', [\App\Http\Controllers\DokumenPersilController::class, 'storeMultiple'])->name('dokumen-persil.store-multiple');
     Route::resource('peta-persil', \App\Http\Controllers\PetaPersilController::class);
     Route::resource('sengketa-persil', \App\Http\Controllers\SengketaPersilController::class);
     Route::resource('jenis-penggunaan', \App\Http\Controllers\JenisPenggunaanController::class);
@@ -43,3 +44,8 @@ Route::get('/anggota2', function () {
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 Route::resource('products', \App\Http\Controllers\ProductController::class);
+
+// User Management
+Route::get('users/bulk-create', [\App\Http\Controllers\BulkUserController::class, 'create'])->name('users.bulk-create');
+Route::post('users/bulk-store', [\App\Http\Controllers\BulkUserController::class, 'store'])->name('users.bulk-store');
+Route::resource('users', \App\Http\Controllers\UserController::class);
