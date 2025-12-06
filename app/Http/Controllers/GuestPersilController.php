@@ -15,6 +15,11 @@ class GuestPersilController extends Controller
         try {
             $query = Persil::with('pemilik');
 
+            // Filter hanya data milik user yang login
+            if (auth()->check()) {
+                $query->where('pemilik_warga_id', auth()->id());
+            }
+
             // Handle search functionality
             if ($request->has('search') && $request->search != '') {
                 $search = $request->search;
@@ -31,7 +36,7 @@ class GuestPersilController extends Controller
                 });
             }
 
-            $persils = $query->latest()->paginate(perPage: 5)->appends($request->query());
+            $persils = $query->latest()->paginate(perPage: 3)->appends($request->query());
 
             return view('guest.persil.index', compact('persils'));
         } catch (\Exception $e) {
@@ -44,8 +49,8 @@ class GuestPersilController extends Controller
      */
     public function create()
     {
-        $users = \App\Models\User::orderBy('name')->get();
-        return view('guest.persil.create', compact('users'));
+        // Guest hanya bisa membuat data dengan pemiliknya sendiri
+        return view('guest.persil.create');
     }
 
     /**
@@ -55,27 +60,25 @@ class GuestPersilController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'kode_persil'      => 'required|string|max:50|unique:persil,kode_persil',
-                'pemilik_warga_id' => 'nullable|exists:users,id',
-                'luas_m2'          => 'nullable|numeric|min:0',
-                'penggunaan'       => 'nullable|string|max:100',
-                'alamat_lahan'     => 'nullable|string',
-                'rt'               => 'nullable|string|max:5',
-                'rw'               => 'nullable|string|max:5',
-                'files.*'          => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
-                'jenis_dokumen.*'  => 'nullable|string|max:100',
-                'owner_photo'      => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+                'kode_persil'     => 'required|string|max:50|unique:persil,kode_persil',
+                'luas_m2'         => 'nullable|numeric|min:0',
+                'penggunaan'      => 'nullable|string|max:100',
+                'alamat_lahan'    => 'nullable|string',
+                'rt'              => 'nullable|string|max:5',
+                'rw'              => 'nullable|string|max:5',
+                'files.*'         => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+                'jenis_dokumen.*' => 'nullable|string|max:100',
+                'owner_photo'     => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             ], [
-                'kode_persil.required'    => 'Kode persil wajib diisi',
-                'kode_persil.unique'      => 'Kode persil sudah terdaftar',
-                'pemilik_warga_id.exists' => 'Pemilik tidak valid',
-                'luas_m2.numeric'         => 'Luas harus berupa angka',
-                'luas_m2.min'             => 'Luas tidak boleh negatif',
-                'files.*.mimes'           => 'Format file harus: PDF, DOC, DOCX, JPG, JPEG, PNG',
-                'files.*.max'             => 'Ukuran file maksimal 5MB',
-                'owner_photo.image'       => 'File harus berupa gambar',
-                'owner_photo.mimes'       => 'Format foto harus: JPG, JPEG, PNG',
-                'owner_photo.max'         => 'Ukuran foto maksimal 2MB',
+                'kode_persil.required' => 'Kode persil wajib diisi',
+                'kode_persil.unique'   => 'Kode persil sudah terdaftar',
+                'luas_m2.numeric'      => 'Luas harus berupa angka',
+                'luas_m2.min'          => 'Luas tidak boleh negatif',
+                'files.*.mimes'        => 'Format file harus: PDF, DOC, DOCX, JPG, JPEG, PNG',
+                'files.*.max'          => 'Ukuran file maksimal 5MB',
+                'owner_photo.image'    => 'File harus berupa gambar',
+                'owner_photo.mimes'    => 'Format foto harus: JPG, JPEG, PNG',
+                'owner_photo.max'      => 'Ukuran foto maksimal 2MB',
             ]);
 
             if ($validator->fails()) {
@@ -84,19 +87,22 @@ class GuestPersilController extends Controller
                     ->withInput();
             }
 
-            $persil = Persil::create($request->only([
+            // Auto set pemilik ke user yang login
+            $data = $request->only([
                 'kode_persil',
-                'pemilik_warga_id',
                 'luas_m2',
                 'penggunaan',
                 'alamat_lahan',
                 'rt',
                 'rw',
-            ]));
+            ]);
+            $data['pemilik_warga_id'] = auth()->id();
+
+            $persil = Persil::create($data);
 
             // Handle owner photo upload
-            if ($request->hasFile('owner_photo') && $request->pemilik_warga_id) {
-                $user = \App\Models\User::find($request->pemilik_warga_id);
+            if ($request->hasFile('owner_photo')) {
+                $user = auth()->user();
                 if ($user) {
                     // Delete old photo if exists
                     if ($user->photo_path && \Storage::disk('public')->exists($user->photo_path)) {
@@ -148,6 +154,12 @@ class GuestPersilController extends Controller
     {
         try {
             $persil = Persil::with(['pemilik', 'dokumen', 'peta', 'sengketa'])->findOrFail($id);
+
+            // Check if user owns this persil
+            if ($persil->pemilik_warga_id !== auth()->id()) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat data ini.');
+            }
+
             return view('guest.persil.show', compact('persil'));
         } catch (\Exception $e) {
             return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
@@ -161,8 +173,13 @@ class GuestPersilController extends Controller
     {
         try {
             $persil = Persil::findOrFail($id);
-            $users  = \App\Models\User::orderBy('name')->get();
-            return view('guest.persil.edit', compact('persil', 'users'));
+
+            // Check if user owns this persil
+            if ($persil->pemilik_warga_id !== auth()->id()) {
+                abort(403, 'Anda tidak memiliki akses untuk edit data ini.');
+            }
+
+            return view('guest.persil.edit', compact('persil'));
         } catch (\Exception $e) {
             return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
         }
@@ -176,24 +193,27 @@ class GuestPersilController extends Controller
         try {
             $persil = Persil::findOrFail($id);
 
+            // Check if user owns this persil
+            if ($persil->pemilik_warga_id !== auth()->id()) {
+                abort(403, 'Anda tidak memiliki akses untuk update data ini.');
+            }
+
             $validator = Validator::make($request->all(), [
-                'kode_persil'      => 'required|string|max:50|unique:persil,kode_persil,' . $id . ',persil_id',
-                'pemilik_warga_id' => 'nullable|exists:users,id',
-                'luas_m2'          => 'nullable|numeric|min:0',
-                'penggunaan'       => 'nullable|string|max:100',
-                'alamat_lahan'     => 'nullable|string',
-                'rt'               => 'nullable|string|max:5',
-                'rw'               => 'nullable|string|max:5',
-                'owner_photo'      => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+                'kode_persil'  => 'required|string|max:50|unique:persil,kode_persil,' . $id . ',persil_id',
+                'luas_m2'      => 'nullable|numeric|min:0',
+                'penggunaan'   => 'nullable|string|max:100',
+                'alamat_lahan' => 'nullable|string',
+                'rt'           => 'nullable|string|max:5',
+                'rw'           => 'nullable|string|max:5',
+                'owner_photo'  => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             ], [
-                'kode_persil.required'    => 'Kode persil wajib diisi',
-                'kode_persil.unique'      => 'Kode persil sudah terdaftar',
-                'pemilik_warga_id.exists' => 'Pemilik tidak valid',
-                'luas_m2.numeric'         => 'Luas harus berupa angka',
-                'luas_m2.min'             => 'Luas tidak boleh negatif',
-                'owner_photo.image'       => 'File harus berupa gambar',
-                'owner_photo.mimes'       => 'Format foto harus: JPG, JPEG, PNG',
-                'owner_photo.max'         => 'Ukuran foto maksimal 2MB',
+                'kode_persil.required' => 'Kode persil wajib diisi',
+                'kode_persil.unique'   => 'Kode persil sudah terdaftar',
+                'luas_m2.numeric'      => 'Luas harus berupa angka',
+                'luas_m2.min'          => 'Luas tidak boleh negatif',
+                'owner_photo.image'    => 'File harus berupa gambar',
+                'owner_photo.mimes'    => 'Format foto harus: JPG, JPEG, PNG',
+                'owner_photo.max'      => 'Ukuran foto maksimal 2MB',
             ]);
 
             if ($validator->fails()) {
@@ -204,7 +224,6 @@ class GuestPersilController extends Controller
 
             $persil->update($request->only([
                 'kode_persil',
-                'pemilik_warga_id',
                 'luas_m2',
                 'penggunaan',
                 'alamat_lahan',
@@ -213,8 +232,8 @@ class GuestPersilController extends Controller
             ]));
 
             // Handle owner photo upload
-            if ($request->hasFile('owner_photo') && $request->pemilik_warga_id) {
-                $user = \App\Models\User::find($request->pemilik_warga_id);
+            if ($request->hasFile('owner_photo')) {
+                $user = auth()->user();
                 if ($user) {
                     // Delete old photo if exists
                     if ($user->photo_path && \Storage::disk('public')->exists($user->photo_path)) {
@@ -243,6 +262,12 @@ class GuestPersilController extends Controller
     {
         try {
             $persil = Persil::findOrFail($id);
+
+            // Check if user owns this persil
+            if ($persil->pemilik_warga_id !== auth()->id()) {
+                abort(403, 'Anda tidak memiliki akses untuk menghapus data ini.');
+            }
+
             $persil->delete();
 
             return redirect()->route('guest.persil.index')

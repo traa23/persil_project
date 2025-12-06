@@ -53,46 +53,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="pemilik_warga_id">Pemilik Persil</label>
-                    <select id="pemilik_warga_id" name="pemilik_warga_id">
-                        <option value="" data-photo="">-- Pilih Pemilik (Opsional) --</option>
-                        @foreach($users as $user)
-                        <option value="{{ $user->id }}"
-                                data-photo="{{ $user->photo_path ? asset('storage/' . $user->photo_path) : '' }}"
-                                data-name="{{ $user->name }}"
-                                {{ old('pemilik_warga_id') == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }}
-                        </option>
-                        @endforeach
-                    </select>
-
-                    <!-- Owner Photo Preview -->
-                    <div id="owner-photo-preview" class="owner-preview" style="display: none;">
-                        <div class="preview-container">
-                            <img src="" alt="" class="preview-photo" id="preview-photo" style="display: none;">
-                            <div class="preview-avatar" id="preview-avatar" style="display: none;"></div>
-                            <div class="preview-info">
-                                <small>Foto Profil Pemilik</small>
-                                <strong id="preview-name"></strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Upload Foto Pemilik -->
-                    <div id="owner-photo-upload" class="owner-photo-upload" style="display: none;">
-                        <label for="owner_photo">Upload/Ganti Foto Pemilik (Opsional)</label>
-                        <input type="file" id="owner_photo" name="owner_photo" accept="image/jpeg,image/png,image/jpg">
-                        <small style="color: #666; display: block; margin-top: 0.5em;">Format: JPG, PNG (Max 2MB)</small>
-
-                        <!-- Preview foto yang akan diupload -->
-                        <div id="new-photo-preview" style="display: none; margin-top: 1em;">
-                            <p style="font-weight: 600; color: #2ebaae; margin-bottom: 0.5em;">Preview Foto Baru:</p>
-                            <img id="new-photo-img" src="" alt="" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #2ebaae;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label for="luas_m2">Luas (m²)</label>
                     <input type="number" id="luas_m2" name="luas_m2" step="0.01" min="0" value="{{ old('luas_m2') }}">
                 </div>
@@ -148,83 +108,6 @@
 </section>
 
 <script>
-// Owner Photo Preview Handler
-document.addEventListener('DOMContentLoaded', function() {
-    const ownerSelect = document.getElementById('pemilik_warga_id');
-    const ownerPreview = document.getElementById('owner-photo-preview');
-    const previewPhoto = document.getElementById('preview-photo');
-    const previewAvatar = document.getElementById('preview-avatar');
-    const previewName = document.getElementById('preview-name');
-    const ownerPhotoUpload = document.getElementById('owner-photo-upload');
-    const ownerPhotoInput = document.getElementById('owner_photo');
-    const newPhotoPreview = document.getElementById('new-photo-preview');
-    const newPhotoImg = document.getElementById('new-photo-img');
-
-    if (ownerSelect) {
-        ownerSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const photoUrl = selectedOption.getAttribute('data-photo');
-            const ownerName = selectedOption.getAttribute('data-name');
-
-            if (this.value && ownerName) {
-                ownerPreview.style.display = 'flex';
-                ownerPhotoUpload.style.display = 'block';
-                previewName.textContent = ownerName;
-
-                if (photoUrl) {
-                    previewPhoto.src = photoUrl;
-                    previewPhoto.alt = ownerName;
-                    previewPhoto.style.display = 'block';
-                    previewAvatar.style.display = 'none';
-                } else {
-                    previewPhoto.style.display = 'none';
-                    previewAvatar.style.display = 'flex';
-                    previewAvatar.textContent = ownerName.charAt(0).toUpperCase();
-                }
-            } else {
-                ownerPreview.style.display = 'none';
-                ownerPhotoUpload.style.display = 'none';
-                newPhotoPreview.style.display = 'none';
-                ownerPhotoInput.value = '';
-            }
-        });
-    }
-
-    // Handle new photo upload preview
-    if (ownerPhotoInput) {
-        ownerPhotoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Validate file size (max 2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Ukuran file terlalu besar! Maksimal 2MB');
-                    this.value = '';
-                    newPhotoPreview.style.display = 'none';
-                    return;
-                }
-
-                // Validate file type
-                if (!file.type.match('image/(jpeg|jpg|png)')) {
-                    alert('Format file tidak didukung! Gunakan JPG atau PNG');
-                    this.value = '';
-                    newPhotoPreview.style.display = 'none';
-                    return;
-                }
-
-                // Show preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    newPhotoImg.src = e.target.result;
-                    newPhotoPreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                newPhotoPreview.style.display = 'none';
-            }
-        });
-    }
-});
-
 // Multi File Upload for Create Form
 const fileInputCreate = document.getElementById('filesCreate');
 const dropZoneCreate = document.getElementById('dropZoneCreate');

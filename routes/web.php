@@ -1,16 +1,32 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuestPersilController;
 use Illuminate\Support\Facades\Route;
+
+// Authentication Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Default Laravel welcome page
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Guest resource routes
-Route::prefix('guest')->name('guest.')->group(function () {
+// Admin Routes
+Route::middleware(['auth', 'admin.role'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::resource('users', UserManagementController::class);
+});
+
+// Guest resource routes (protected by auth)
+Route::middleware('auth')->prefix('guest')->name('guest.')->group(function () {
     // Persil routes
     Route::get('/', [GuestPersilController::class, 'index'])->name('persil.index');
     Route::prefix('persil')->name('persil.')->group(function () {
@@ -41,11 +57,11 @@ Route::get('/anggota2', function () {
     return view('anggota2');
 });
 
-Route::get('dashboard', [DashboardController::class, 'index'])
-    ->name('dashboard');
 Route::resource('products', \App\Http\Controllers\ProductController::class);
 
 // User Management
-Route::get('users/bulk-create', [\App\Http\Controllers\BulkUserController::class, 'create'])->name('users.bulk-create');
-Route::post('users/bulk-store', [\App\Http\Controllers\BulkUserController::class, 'store'])->name('users.bulk-store');
-Route::resource('users', \App\Http\Controllers\UserController::class);
+Route::middleware('auth')->group(function () {
+    Route::get('users/bulk-create', [\App\Http\Controllers\BulkUserController::class, 'create'])->name('users.bulk-create');
+    Route::post('users/bulk-store', [\App\Http\Controllers\BulkUserController::class, 'store'])->name('users.bulk-store');
+    Route::resource('users', \App\Http\Controllers\UserController::class);
+});

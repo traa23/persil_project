@@ -1,10 +1,9 @@
 <?php
-
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -15,6 +14,7 @@ class User extends Authenticatable
         'email',
         'photo_path',
         'password',
+        'role',
     ];
 
     protected $hidden = [
@@ -26,12 +26,27 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
     public function photos(): HasMany
     {
         return $this->hasMany(UserPhoto::class);
+    }
+
+    public function persils(): HasMany
+    {
+        return $this->hasMany(Persil::class, 'pemilik_warga_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === 'guest';
     }
 }

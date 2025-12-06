@@ -63,58 +63,24 @@
 
                 <div class="form-group">
                     <label for="pemilik_warga_id">Pemilik Persil</label>
-                    <select id="pemilik_warga_id" name="pemilik_warga_id">
-                        <option value="" data-photo="">-- Pilih Pemilik (Opsional) --</option>
-                        @foreach($users as $user)
-                        <option value="{{ $user->id }}"
-                                data-photo="{{ $user->photo_path ? asset('storage/' . $user->photo_path) : '' }}"
-                                data-name="{{ $user->name }}"
-                                {{ old('pemilik_warga_id', $persil->pemilik_warga_id) == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }}
-                        </option>
-                        @endforeach
-                    </select>
-
-                    <!-- Owner Photo Preview -->
-                    <div id="owner-photo-preview" class="owner-preview" style="display: {{ $persil->pemilik && $persil->pemilik->photo_path ? 'flex' : 'none' }};">
-                        <div class="preview-container">
-                            @if($persil->pemilik && $persil->pemilik->photo_path)
-                                <img src="{{ asset('storage/' . $persil->pemilik->photo_path) }}" alt="{{ $persil->pemilik->name }}" class="preview-photo" id="preview-photo">
+                    <div style="padding: 10px; background: #f5f5f5; border-radius: 5px; display: flex; align-items: center; gap: 15px;">
+                        @if($persil->pemilik)
+                            @if($persil->pemilik->photo_path)
+                                <img src="{{ asset('storage/' . $persil->pemilik->photo_path) }}" alt="{{ $persil->pemilik->name }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
                             @else
-                                <img src="" alt="" class="preview-photo" id="preview-photo" style="display: none;">
+                                <div style="width: 50px; height: 50px; border-radius: 50%; background: #2ebaae; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                    {{ strtoupper(substr($persil->pemilik->name, 0, 1)) }}
+                                </div>
                             @endif
-                            <div class="preview-avatar" id="preview-avatar" style="display: {{ $persil->pemilik && !$persil->pemilik->photo_path ? 'flex' : 'none' }};">
-                                {{ $persil->pemilik ? strtoupper(substr($persil->pemilik->name, 0, 1)) : '' }}
+                            <div>
+                                <strong>{{ $persil->pemilik->name }}</strong><br>
+                                <small style="color: #666;">{{ $persil->pemilik->email }}</small>
                             </div>
-                            <div class="preview-info">
-                                <small>Foto Profil Pemilik</small>
-                                <strong id="preview-name">{{ $persil->pemilik ? $persil->pemilik->name : '' }}</strong>
-                            </div>
-                        </div>
+                        @else
+                            <em style="color: #999;">Belum ada pemilik yang ditentukan</em>
+                        @endif
                     </div>
-
-                    <!-- Upload Foto Pemilik -->
-                    <div id="owner-photo-upload" class="owner-photo-upload" style="display: {{ $persil->pemilik ? 'block' : 'none' }};">
-                        <label for="owner_photo">Upload/Ganti Foto Pemilik (Opsional)</label>
-                        <input type="file" id="owner_photo" name="owner_photo" accept="image/jpeg,image/png,image/jpg">
-                        <small style="color: #666; display: block; margin-top: 0.5em;">Format: JPG, PNG (Max 2MB)</small>
-
-                        <!-- Preview foto yang akan diupload -->
-                        <div id="new-photo-preview" style="display: none; margin-top: 1em;">
-                            <p style="font-weight: 600; color: #2ebaae; margin-bottom: 0.5em;">Preview Foto Baru:</p>
-                            <img id="new-photo-img" src="" alt="" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #2ebaae;">
-                        </div>
-                    </div>
-
-                    @error('pemilik_warga_id')
-                    <div class="validation-error">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" fill="#ff9800"/>
-                            <path d="M12 8V12M12 16H12.01" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <span>{{ $message }}</span>
-                    </div>
-                    @enderror
+                    <small style="color: #666; display: block; margin-top: 0.5em;">Pemilik tidak dapat diubah (sesuai dengan akun yang membuat)</small>
                 </div>
 
                 <div class="form-group">
@@ -571,10 +537,10 @@
     // Custom validation message untuk HTML5 required fields
     document.addEventListener('DOMContentLoaded', function() {
         const requiredInputs = document.querySelectorAll('input[required], textarea[required], select[required]');
-        
+
         requiredInputs.forEach(input => {
             const errorDiv = document.getElementById(input.id + '-error');
-            
+
             // Custom message untuk setiap field
             const fieldLabels = {
                 'kode_persil': 'Kode Persil wajib diisi',
@@ -588,20 +554,20 @@
 
             // Set custom validation message
             input.setCustomValidity('');
-            
+
             // Handle invalid event
             input.addEventListener('invalid', function(e) {
                 e.preventDefault();
                 const message = fieldLabels[input.id] || 'Field ini wajib diisi';
-                
+
                 if (errorDiv) {
                     errorDiv.textContent = message;
                     errorDiv.classList.add('show');
                 }
-                
+
                 // Tambahkan class error ke input
                 input.classList.add('input-error');
-                
+
                 // Highlight input
                 input.style.borderColor = '#ff9800';
                 input.style.boxShadow = '0 0 8px rgba(255, 152, 0, 0.4)';
@@ -636,7 +602,7 @@
         if (form) {
             form.addEventListener('submit', function(e) {
                 let isValid = true;
-                
+
                 requiredInputs.forEach(input => {
                     if (!input.validity.valid) {
                         isValid = false;
@@ -650,19 +616,19 @@
                             'rt': 'RT wajib diisi',
                             'rw': 'RW wajib diisi'
                         };
-                        
+
                         if (errorDiv) {
                             const message = fieldLabels[input.id] || 'Field ini wajib diisi';
                             errorDiv.textContent = message;
                             errorDiv.classList.add('show');
                         }
-                        
+
                         input.classList.add('input-error');
                         input.style.borderColor = '#ff9800';
                         input.style.boxShadow = '0 0 8px rgba(255, 152, 0, 0.4)';
                     }
                 });
-                
+
                 if (!isValid) {
                     e.preventDefault();
                     // Scroll ke field pertama yang error

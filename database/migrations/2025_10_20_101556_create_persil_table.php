@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -21,7 +22,7 @@ return new class extends Migration {
             $table->foreignId('pemilik_warga_id')
                 ->nullable()
                 ->constrained('users')
-                ->nullOnDelete();
+                ->cascadeOnDelete();
 
             $table->decimal('luas_m2', 12, 2)->nullable();
             $table->string('penggunaan', 100)->nullable();
