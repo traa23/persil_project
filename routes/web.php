@@ -65,3 +65,11 @@ Route::middleware('auth')->group(function () {
     Route::post('users/bulk-store', [\App\Http\Controllers\BulkUserController::class, 'store'])->name('users.bulk-store');
     Route::resource('users', \App\Http\Controllers\UserController::class);
 });
+
+// Profile Management
+Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ProfileController::class, 'show'])->name('show');
+    Route::get('/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
+    Route::put('/', [\App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+    Route::delete('/photo', [\App\Http\Controllers\ProfileController::class, 'removePhoto'])->name('remove-photo');
+});

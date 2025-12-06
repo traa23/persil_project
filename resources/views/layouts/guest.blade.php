@@ -88,6 +88,7 @@
         <ul class="links">
             <li><a href="{{ route('guest.persil.index') }}"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="{{ route('guest.persil.create') }}"><i class="fas fa-plus-circle"></i> Tambah Data</a></li>
+            <li><a href="{{ route('profile.show') }}"><i class="fas fa-user"></i> Profil</a></li>
             <li data-logout="true" style="border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px;">
                 <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
                     @csrf
