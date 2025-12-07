@@ -27,6 +27,22 @@
             position: relative;
         }
 
+        /* Spline Background */
+        .spline-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .spline-background spline-viewer {
+            width: 100%;
+            height: 100%;
+        }
+
         body::before {
             content: '';
             position: absolute;
@@ -41,36 +57,18 @@
 
         .login-container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 500px;
             padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
             background: rgba(255, 255, 255, 0.08);
             border-radius: 20px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
         }
 
-        /* 3D Animation Section */
-        .animation-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 500px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
 
-        spline-viewer {
-            width: 100%;
-            height: 100%;
-        }
 
         /* Login Section */
         .login-section {
@@ -100,7 +98,7 @@
         /* Login Card */
         .login-card {
             background: white;
-            border-radius: 16px;
+            border-radius: 0;
             padding: 40px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -283,13 +281,8 @@
         }
 
         /* Responsive */
-        @media (max-width: 1024px) {
-            .login-container {
-                grid-template-columns: 1fr;
-                max-width: 500px;
-            }
-
-            .animation-section {
+        @media (max-width: 768px) {
+            .spline-background {
                 display: none;
             }
 
@@ -345,49 +338,7 @@
             display: block;
         }
 
-        /* Robot Animation States */
-        .animation-section.robot-focus {
-            animation: robotFocus 0.5s ease-in-out;
-        }
 
-        .animation-section.robot-typing {
-            animation: robotTyping 0.8s ease-in-out;
-        }
-
-        .animation-section.robot-hover {
-            animation: robotHover 0.3s ease-in-out;
-        }
-
-        .animation-section.robot-submit {
-            animation: robotSubmit 1s ease-in-out;
-        }
-
-        @keyframes robotFocus {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes robotTyping {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        @keyframes robotHover {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(-2deg); }
-            75% { transform: rotate(2deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        @keyframes robotSubmit {
-            0% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.1) rotate(5deg); }
-            50% { transform: scale(0.95) rotate(-5deg); }
-            75% { transform: scale(1.05) rotate(2deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
 
         /* Enhanced Mobile Responsiveness */
         @media (max-width: 480px) {
@@ -462,12 +413,12 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <!-- Animation Section -->
-        <div class="animation-section">
-            <spline-viewer url="https://prod.spline.design/dAELVACqCsJoyBPs/scene.splinecode"></spline-viewer>
-        </div>
+    <!-- Spline Background -->
+    <div class="spline-background">
+        <spline-viewer url="https://prod.spline.design/dAELVACqCsJoyBPs/scene.splinecode"></spline-viewer>
+    </div>
 
+    <div class="login-container">
         <!-- Login Section -->
         <div class="login-section">
             <div class="login-header">
@@ -579,7 +530,6 @@
                 if (splineViewer && splineViewer.emitEvent) {
                     splineViewer.emitEvent('mouseDown', 'robot'); // Assuming 'robot' is the object name in Spline
                 }
-                animateRobot('focus');
             });
 
             // Password focus - different animation
@@ -587,7 +537,6 @@
                 if (splineViewer && splineViewer.emitEvent) {
                     splineViewer.emitEvent('mouseDown', 'robot');
                 }
-                animateRobot('typing');
             });
 
             // Button hover - robot reaction
@@ -595,7 +544,6 @@
                 if (splineViewer && splineViewer.emitEvent) {
                     splineViewer.emitEvent('mouseHover', 'robot');
                 }
-                animateRobot('hover');
             });
 
             // Form submit - final animation
@@ -603,28 +551,7 @@
                 if (splineViewer && splineViewer.emitEvent) {
                     splineViewer.emitEvent('mouseDown', 'robot');
                 }
-                animateRobot('submit');
             });
-        }
-
-        function animateRobot(action) {
-            const animationSection = document.querySelector('.animation-section');
-            animationSection.classList.remove('robot-focus', 'robot-typing', 'robot-hover', 'robot-submit');
-
-            switch(action) {
-                case 'focus':
-                    animationSection.classList.add('robot-focus');
-                    break;
-                case 'typing':
-                    animationSection.classList.add('robot-typing');
-                    break;
-                case 'hover':
-                    animationSection.classList.add('robot-hover');
-                    break;
-                case 'submit':
-                    animationSection.classList.add('robot-submit');
-                    break;
-            }
         }
 
         // Add loading state to button
@@ -634,16 +561,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
         });
 
-        // Add responsive check
-        function checkResponsive() {
-            const animSection = document.querySelector('.animation-section');
-            if (window.innerWidth <= 1024 && animSection.style.display !== 'none') {
-                animSection.style.display = 'none';
-            }
-        }
 
-        window.addEventListener('resize', checkResponsive);
-        checkResponsive();
     </script>
 </body>
 </html>
