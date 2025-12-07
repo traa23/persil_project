@@ -18,12 +18,25 @@
 
         body {
             font-family: 'DM Sans', 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1565C0 0%, #283593 100%);
+            background: linear-gradient(135deg, #1565C0 0%, #283593 50%, #0D47A1 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .login-container {
@@ -130,6 +143,16 @@
             border-color: #1565C0;
             background: white;
             box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.1);
+            transform: scale(1.02);
+        }
+
+        .form-control:focus + .form-label i {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .form-control::placeholder {
@@ -321,13 +344,128 @@
             margin-top: 6px;
             display: block;
         }
+
+        /* Robot Animation States */
+        .animation-section.robot-focus {
+            animation: robotFocus 0.5s ease-in-out;
+        }
+
+        .animation-section.robot-typing {
+            animation: robotTyping 0.8s ease-in-out;
+        }
+
+        .animation-section.robot-hover {
+            animation: robotHover 0.3s ease-in-out;
+        }
+
+        .animation-section.robot-submit {
+            animation: robotSubmit 1s ease-in-out;
+        }
+
+        @keyframes robotFocus {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes robotTyping {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes robotHover {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-2deg); }
+            75% { transform: rotate(2deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes robotSubmit {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            50% { transform: scale(0.95) rotate(-5deg); }
+            75% { transform: scale(1.05) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* Enhanced Mobile Responsiveness */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 16px 12px;
+                gap: 20px;
+                max-width: 100%;
+            }
+
+            .login-card {
+                padding: 20px;
+            }
+
+            .login-header h1 {
+                font-size: 20px;
+            }
+
+            .login-header p {
+                font-size: 12px;
+            }
+
+            .form-control {
+                padding: 12px 14px;
+                font-size: 13px;
+            }
+
+            .btn-login {
+                padding: 12px 20px;
+                font-size: 13px;
+            }
+
+            .info-box {
+                padding: 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* iOS Specific Styles */
+        .ios .form-control {
+            -webkit-appearance: none;
+            border-radius: 8px;
+        }
+
+        .ios .btn-login {
+            -webkit-appearance: none;
+            border-radius: 8px;
+        }
+
+        /* Desktop Enhancements */
+        @media (min-width: 1025px) {
+            .login-container {
+                max-width: 1400px;
+                gap: 60px;
+            }
+
+            .animation-section {
+                height: 550px;
+            }
+
+            .login-card {
+                padding: 50px;
+            }
+
+            .login-header h1 {
+                font-size: 42px;
+            }
+
+            .login-header p {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <!-- Animation Section -->
         <div class="animation-section">
-            <spline-viewer url="https://prod.spline.design/f6AezzZ2rnZYhy5X/scene.splinecode"></spline-viewer>
+            <spline-viewer url="https://prod.spline.design/dAELVACqCsJoyBPs/scene.splinecode"></spline-viewer>
         </div>
 
         <!-- Login Section -->
@@ -418,6 +556,77 @@
     </div>
 
     <script>
+        let splineViewer = null;
+
+        // Initialize Spline viewer and set up synchronization
+        document.addEventListener('DOMContentLoaded', function() {
+            const splineElement = document.querySelector('spline-viewer');
+            if (splineElement) {
+                splineViewer = splineElement;
+
+                // Synchronize with form interactions
+                setupFormSynchronization();
+            }
+        });
+
+        function setupFormSynchronization() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.querySelector('.btn-login');
+
+            // Email focus - trigger robot animation
+            emailInput.addEventListener('focus', function() {
+                if (splineViewer && splineViewer.emitEvent) {
+                    splineViewer.emitEvent('mouseDown', 'robot'); // Assuming 'robot' is the object name in Spline
+                }
+                animateRobot('focus');
+            });
+
+            // Password focus - different animation
+            passwordInput.addEventListener('focus', function() {
+                if (splineViewer && splineViewer.emitEvent) {
+                    splineViewer.emitEvent('mouseDown', 'robot');
+                }
+                animateRobot('typing');
+            });
+
+            // Button hover - robot reaction
+            loginBtn.addEventListener('mouseenter', function() {
+                if (splineViewer && splineViewer.emitEvent) {
+                    splineViewer.emitEvent('mouseHover', 'robot');
+                }
+                animateRobot('hover');
+            });
+
+            // Form submit - final animation
+            document.querySelector('form').addEventListener('submit', function() {
+                if (splineViewer && splineViewer.emitEvent) {
+                    splineViewer.emitEvent('mouseDown', 'robot');
+                }
+                animateRobot('submit');
+            });
+        }
+
+        function animateRobot(action) {
+            const animationSection = document.querySelector('.animation-section');
+            animationSection.classList.remove('robot-focus', 'robot-typing', 'robot-hover', 'robot-submit');
+
+            switch(action) {
+                case 'focus':
+                    animationSection.classList.add('robot-focus');
+                    break;
+                case 'typing':
+                    animationSection.classList.add('robot-typing');
+                    break;
+                case 'hover':
+                    animationSection.classList.add('robot-hover');
+                    break;
+                case 'submit':
+                    animationSection.classList.add('robot-submit');
+                    break;
+            }
+        }
+
         // Add loading state to button
         document.querySelector('form')?.addEventListener('submit', function() {
             const btn = document.querySelector('.btn-login');
