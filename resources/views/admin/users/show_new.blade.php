@@ -22,9 +22,15 @@
             <div class="card">
                 <!-- Profile Header -->
                 <div style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #ecf0f1;">
-                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, {{ $user->role === 'admin' ? '#9b59b6' : '#3498db' }} 0%, {{ $user->role === 'admin' ? '#8e44ad' : '#2980b9' }} 100%); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                        <span style="color: white; font-size: 40px; font-weight: bold;"><i class="fas fa-user"></i></span>
-                    </div>
+                    @if($user->photo_path && \Storage::disk('public')->exists($user->photo_path))
+                        <div style="width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <img src="{{ asset('storage/' . $user->photo_path) }}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    @else
+                        <div style="width: 100px; height: 100px; background: linear-gradient(135deg, {{ $user->role === 'admin' ? '#9b59b6' : '#3498db' }} 0%, {{ $user->role === 'admin' ? '#8e44ad' : '#2980b9' }} 100%); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <span style="color: white; font-size: 40px; font-weight: bold;"><i class="fas fa-user"></i></span>
+                        </div>
+                    @endif
                     <h2 style="margin: 10px 0; color: #2c3e50; font-size: 24px;">{{ $user->name }}</h2>
                     <p style="margin: 8px 0; color: #7f8c8d; font-size: 14px;">{{ $user->email }}</p>
                     <span class="badge {{ $user->role === 'admin' ? 'badge-admin' : 'badge-guest' }}" style="margin-top: 10px;">

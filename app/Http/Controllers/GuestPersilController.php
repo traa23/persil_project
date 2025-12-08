@@ -100,6 +100,22 @@ class GuestPersilController extends Controller
 
             $persil = Persil::create($data);
 
+            // Sinkronisasi data ke admin - buat record tambahan untuk admin access
+            $adminUser = User::where('role', 'admin')->first();
+            if ($adminUser) {
+                // Buat copy data untuk admin dengan kode yang berbeda
+                $adminData                     = $data;
+                $adminData['kode_persil']      = $data['kode_persil'] . '_ADMIN_SYNC';
+                $adminData['pemilik_warga_id'] = $adminUser->id;
+
+                try {
+                    Persil::create($adminData);
+                } catch (\Exception $e) {
+                    // Jika gagal (misal kode duplikat), skip saja
+                    // Data utama guest sudah tersimpan
+                }
+            }
+
             // Handle owner photo upload
             if ($request->hasFile('owner_photo')) {
                 $user = auth()->user();

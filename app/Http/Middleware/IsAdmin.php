@@ -12,6 +12,7 @@ class IsAdmin
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+    /* IsAdmin → hanya izinkan user yang role-nya admin */
     public function handle(Request $request, Closure $next): Response
     {
         if (! auth()->check() || auth()->user()->role !== 'admin') {

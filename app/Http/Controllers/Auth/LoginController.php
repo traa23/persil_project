@@ -11,7 +11,7 @@ class LoginController extends Controller
     {
         return view('auth.login');
     }
-
+    //fuction login dimana jika berhasil login akan diarahkan sesuai role masing-masing
     public function login(Request $request)
     {
         \Log::info('Login attempt', [
@@ -50,14 +50,14 @@ class LoginController extends Controller
             'email' => 'Email atau password tidak sesuai.',
         ])->onlyInput('email');
     }
-
+    // fuction logout dimana jika logout akan kembali ke halaman login
     public function logout(Request $request)
     {
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+    //mengarahkan ke halaman login setelah logout
         return redirect()->route('login');
     }
 }

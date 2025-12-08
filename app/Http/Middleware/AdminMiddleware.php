@@ -14,6 +14,10 @@ class AdminMiddleware
      * @param  \Closure  $next
      * @return mixed
      */
+    /*Middleware ini tugasnya menjaga route yang hanya boleh diakses oleh user dengan role admin.
+    Jadi sebelum request masuk ke controller, middleware ini nge-cek dulu: 
+    User sudah login belum?
+    Role user itu admin atau bukan?*/
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {

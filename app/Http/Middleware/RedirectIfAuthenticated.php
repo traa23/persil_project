@@ -15,6 +15,8 @@ class RedirectIfAuthenticated
      * @param  string|null  ...$guards
      * @return mixed
      */
+    /* Kalau user sudah login, Logikanya → “Eh kamu udah login, jangan balik ke login lagi, sana masuk ke dashboardmu!”
+    Kalau belum login → diperbolehkan masuk ke halaman login/register.*/
     public function handle(Request $request, Closure $next, ...$guards)
     {
         $guards = empty($guards) ? [null] : $guards;

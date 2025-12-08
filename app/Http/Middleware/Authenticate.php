@@ -15,6 +15,8 @@ class Authenticate
      * @param  string|null  ...$guards
      * @return mixed
      */
+    /*Middleware ini fungsinya sebagai penjaga pintu utama:
+    "Kalau belum login, ga bisa masuk. Harus login dulu." */
     public function handle(Request $request, Closure $next, ...$guards)
     {
         $guards = empty($guards) ? [null] : $guards;
