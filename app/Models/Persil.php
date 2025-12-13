@@ -9,8 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Persil extends Model
 {
     protected $table = 'persil';
+
     protected $primaryKey = 'persil_id';
+
     public $incrementing = true;
+
     protected $keyType = 'int';
 
     protected $fillable = [

@@ -11,6 +11,7 @@ class MakeCrud extends Command
     // contoh:
     // php artisan make:crud Product --fields="name:string,price:integer,description:text,image:image"
     protected $signature = 'make:crud {name} {--fields=}';
+
     protected $description = 'Generate CRUD (model, migration, controller, views, route) for given name with dynamic fields + upload';
 
     public function handle()
@@ -35,7 +36,7 @@ class MakeCrud extends Command
         // 4. make controller
         $this->call('make:controller', [
             'name' => "{$name}Controller",
-            '--resource' => true
+            '--resource' => true,
         ]);
 
         $this->updateController($name, $table, $modelFqn, $fields);
@@ -51,7 +52,7 @@ class MakeCrud extends Command
 
     protected function parseFields($fieldsOption)
     {
-        if (!$fieldsOption) {
+        if (! $fieldsOption) {
             return [
                 ['name' => 'name', 'type' => 'string'],
                 ['name' => 'price', 'type' => 'integer'],
@@ -73,6 +74,7 @@ class MakeCrud extends Command
                 ];
             }
         }
+
         return $fields;
     }
 
@@ -87,14 +89,15 @@ class MakeCrud extends Command
             }
         }
 
-        if (!$targetFile) {
+        if (! $targetFile) {
             $this->error('Migration file not found.');
+
             return;
         }
 
-        $fieldsMigration = "";
+        $fieldsMigration = '';
         foreach ($fields as $field) {
-            $fieldsMigration .= $this->fieldToMigration($field) . "\n        ";
+            $fieldsMigration .= $this->fieldToMigration($field)."\n        ";
         }
 
         $stub = <<<PHP
@@ -137,22 +140,23 @@ PHP;
     protected function updateController($name, $table, $modelFqn, $fields)
     {
         $controllerPath = app_path("Http/Controllers/{$name}Controller.php");
-        if (!File::exists($controllerPath)) {
+        if (! File::exists($controllerPath)) {
             $this->error('Controller not found.');
+
             return;
         }
 
         $modelVar = Str::camel($name);
         $modelVarPlural = Str::plural($modelVar);
 
-        $rules = "";
+        $rules = '';
         foreach ($fields as $field) {
-            $rules .= $this->fieldToValidation($field) . "\n            ";
+            $rules .= $this->fieldToValidation($field)."\n            ";
         }
 
-        $fileFields = array_filter($fields, fn($f) => in_array($f['type'], ['image', 'file']));
+        $fileFields = array_filter($fields, fn ($f) => in_array($f['type'], ['image', 'file']));
 
-        $fillable = array_map(fn($f) => "'" . $f['name'] . "'", $fields);
+        $fillable = array_map(fn ($f) => "'".$f['name']."'", $fields);
         $fillableString = implode(', ', $fillable);
 
         $uploadStore = $this->buildUploadStore($fileFields);
@@ -233,6 +237,7 @@ PHP;
     protected function fieldToValidation($field)
     {
         $name = $field['name'];
+
         return match ($field['type']) {
             'integer' => "'$name' => 'required|integer',",
             'text' => "'$name' => 'nullable|string',",
@@ -248,8 +253,9 @@ PHP;
 
     protected function buildUploadStore($fileFields)
     {
-        if (empty($fileFields))
+        if (empty($fileFields)) {
             return '';
+        }
 
         $code = '';
         foreach ($fileFields as $field) {
@@ -261,13 +267,15 @@ PHP;
 
         PHP;
         }
+
         return $code;
     }
 
     protected function buildUploadUpdate($fileFields, $modelVar)
     {
-        if (empty($fileFields))
+        if (empty($fileFields)) {
             return '';
+        }
 
         $code = '';
         foreach ($fileFields as $field) {
@@ -282,18 +290,20 @@ PHP;
 
         PHP;
         }
+
         return $code;
     }
 
     protected function updateModelFillable($name, $fillableString)
     {
         $modelPath = app_path("Models/{$name}.php");
-        if (!File::exists($modelPath))
+        if (! File::exists($modelPath)) {
             return;
+        }
 
         $content = File::get($modelPath);
 
-        if (!str_contains($content, 'fillable')) {
+        if (! str_contains($content, 'fillable')) {
             $fillable = <<<PHP
 
     protected \$fillable = [$fillableString];
@@ -306,37 +316,37 @@ PHP;
     protected function makeViews($name, $table, $fields)
     {
         $viewsPath = resource_path("views/{$table}");
-        if (!File::exists($viewsPath)) {
+        if (! File::exists($viewsPath)) {
             File::makeDirectory($viewsPath, 0755, true);
         }
-        if (!File::exists($viewsPath . '/partials')) {
-            File::makeDirectory($viewsPath . '/partials', 0755, true);
+        if (! File::exists($viewsPath.'/partials')) {
+            File::makeDirectory($viewsPath.'/partials', 0755, true);
         }
 
-        File::put($viewsPath . '/index.blade.php', $this->indexView($name, $table, $fields));
-        File::put($viewsPath . '/create.blade.php', $this->createView($name, $table));
-        File::put($viewsPath . '/edit.blade.php', $this->editView($name, $table));
-        File::put($viewsPath . '/show.blade.php', $this->showView($name, $table, $fields));
-        File::put($viewsPath . '/partials/form.blade.php', $this->formView($name, $table, $fields));
+        File::put($viewsPath.'/index.blade.php', $this->indexView($name, $table, $fields));
+        File::put($viewsPath.'/create.blade.php', $this->createView($name, $table));
+        File::put($viewsPath.'/edit.blade.php', $this->editView($name, $table));
+        File::put($viewsPath.'/show.blade.php', $this->showView($name, $table, $fields));
+        File::put($viewsPath.'/partials/form.blade.php', $this->formView($name, $table, $fields));
     }
 
     protected function indexView($name, $table, $fields)
     {
         $title = Str::headline(Str::plural($name));
 
-        $imageField = collect($fields)->first(fn($f) => in_array($f['type'], ['image', 'file']));
-        $nonImageFields = array_values(array_filter($fields, fn($f) => !in_array($f['type'], ['image', 'file'])));
+        $imageField = collect($fields)->first(fn ($f) => in_array($f['type'], ['image', 'file']));
+        $nonImageFields = array_values(array_filter($fields, fn ($f) => ! in_array($f['type'], ['image', 'file'])));
         $columns = array_slice($nonImageFields, 0, 2);
 
-        $thead = "";
+        $thead = '';
         if ($imageField) {
-            $thead .= "<th>" . Str::headline($imageField['name']) . "</th>\n                        ";
+            $thead .= '<th>'.Str::headline($imageField['name'])."</th>\n                        ";
         }
         foreach ($columns as $col) {
-            $thead .= "<th>" . Str::headline($col['name']) . "</th>\n                        ";
+            $thead .= '<th>'.Str::headline($col['name'])."</th>\n                        ";
         }
 
-        $tbody = "";
+        $tbody = '';
         if ($imageField) {
             $fname = $imageField['name'];
             $tbody .= "<td>@if(\$item->$fname)<img src=\"{{ asset('storage/' . \$item->$fname) }}\" alt=\"\" width=\"60\">@endif</td>\n                        ";
@@ -419,7 +429,8 @@ BLADE;
 
     protected function createView($name, $table)
     {
-        $title = "Create " . Str::headline($name);
+        $title = 'Create '.Str::headline($name);
+
         return <<<BLADE
 @extends('adminlte::page')
 
@@ -447,7 +458,8 @@ BLADE;
     protected function editView($name, $table)
     {
         $modelVar = Str::camel($name);
-        $title = "Edit " . Str::headline($name);
+        $title = 'Edit '.Str::headline($name);
+
         return <<<BLADE
 @extends('adminlte::page')
 
@@ -477,7 +489,7 @@ BLADE;
     {
         $modelVar = Str::camel($name);
 
-        $rows = "";
+        $rows = '';
         foreach ($fields as $field) {
             $label = Str::headline($field['name']);
             if (in_array($field['type'], ['image', 'file'])) {
@@ -487,7 +499,8 @@ BLADE;
             }
         }
 
-        $title = "Detail " . Str::headline($name);
+        $title = 'Detail '.Str::headline($name);
+
         return <<<BLADE
 @extends('adminlte::page')
 
@@ -512,9 +525,9 @@ BLADE;
     {
         $modelVar = Str::camel($name);
 
-        $inputs = "";
+        $inputs = '';
         foreach ($fields as $field) {
-            $inputs .= $this->fieldToFormInput($field, $modelVar) . "\n\n";
+            $inputs .= $this->fieldToFormInput($field, $modelVar)."\n\n";
         }
 
         return $inputs;
@@ -576,4 +589,3 @@ BLADE,
         File::append($routePath, $route);
     }
 }
-

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -48,21 +49,21 @@ class ProfileController extends Controller
 
             // Validasi input dari form
             $validator = Validator::make($request->all(), [
-                'name'             => 'required|string|max:255',
-                'email'            => 'required|email|unique:users,email,' . $user->id,
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,'.$user->id,
                 'current_password' => 'nullable|string',
-                'password'         => 'nullable|string|min:8|confirmed',
-                'photo'            => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'password' => 'nullable|string|min:8|confirmed',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ], [
-                'name.required'      => 'Nama wajib diisi',
-                'email.required'     => 'Email wajib diisi',
-                'email.email'        => 'Format email tidak valid',
-                'email.unique'       => 'Email sudah terdaftar',
-                'password.min'       => 'Password minimal 8 karakter',
+                'name.required' => 'Nama wajib diisi',
+                'email.required' => 'Email wajib diisi',
+                'email.email' => 'Format email tidak valid',
+                'email.unique' => 'Email sudah terdaftar',
+                'password.min' => 'Password minimal 8 karakter',
                 'password.confirmed' => 'Konfirmasi password tidak cocok',
-                'photo.image'        => 'File harus berupa gambar',
-                'photo.mimes'        => 'Format gambar harus jpeg, png, jpg, atau gif',
-                'photo.max'          => 'Ukuran gambar maksimal 2MB',
+                'photo.image' => 'File harus berupa gambar',
+                'photo.mimes' => 'Format gambar harus jpeg, png, jpg, atau gif',
+                'photo.max' => 'Ukuran gambar maksimal 2MB',
             ]);
 
             // Jika validasi gagal, kembali ke form dengan error
@@ -83,7 +84,7 @@ class ProfileController extends Controller
 
             // Menyiapkan data yang akan diupdate
             $data = [
-                'name'  => $request->name,
+                'name' => $request->name,
                 'email' => $request->email,
             ];
 
@@ -100,8 +101,8 @@ class ProfileController extends Controller
                 }
 
                 // Upload foto baru ke storage/public/users/photos
-                $photo              = $request->file('photo');
-                $photoPath          = $photo->store('users/photos', 'public');
+                $photo = $request->file('photo');
+                $photoPath = $photo->store('users/photos', 'public');
                 $data['photo_path'] = $photoPath;
             }
 
@@ -115,7 +116,7 @@ class ProfileController extends Controller
             // Jika terjadi error, kembali ke form dengan pesan error
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -149,7 +150,7 @@ class ProfileController extends Controller
         } catch (\Exception $e) {
             // Jika terjadi error, redirect dengan pesan error
             return redirect()->route('profile.edit')
-                ->with('error', 'Terjadi kesalahan saat menghapus foto: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan saat menghapus foto: '.$e->getMessage());
         }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -13,25 +14,25 @@ class AdminUserSeeder extends Seeder
     {
         // Create admin user
         User::create([
-            'name'     => 'Admin Persil',
-            'email'    => 'admin@persil.test',
+            'name' => 'Admin Persil',
+            'email' => 'admin@persil.test',
             'password' => bcrypt('password'),
-            'role'     => 'admin',
+            'role' => 'admin',
         ]);
 
         // Create some guest users
         User::create([
-            'name'     => 'Guest User 1',
-            'email'    => 'guest1@persil.test',
+            'name' => 'Guest User 1',
+            'email' => 'guest1@persil.test',
             'password' => bcrypt('password'),
-            'role'     => 'guest',
+            'role' => 'guest',
         ]);
 
         User::create([
-            'name'     => 'Guest User 2',
-            'email'    => 'guest2@persil.test',
+            'name' => 'Guest User 2',
+            'email' => 'guest2@persil.test',
             'password' => bcrypt('password'),
-            'role'     => 'guest',
+            'role' => 'guest',
         ]);
     }
 }

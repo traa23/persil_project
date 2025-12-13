@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -15,9 +16,10 @@ class UserManagementController extends Controller
     {
         try {
             $users = User::paginate(10);
+
             return view('admin.users.index_new', compact('users'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memuat daftar pengguna: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memuat daftar pengguna: '.$e->getMessage());
         }
     }
 
@@ -36,27 +38,27 @@ class UserManagementController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name'     => 'required|string|max:255',
-                'email'    => 'required|email|unique:users,email',
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
                 'password' => 'required|string|min:8|confirmed',
-                'role'     => 'required|in:admin,guest',
+                'role' => 'required|in:admin,guest',
             ], [
-                'name.required'      => 'Nama pengguna wajib diisi',
-                'email.required'     => 'Email wajib diisi',
-                'email.email'        => 'Email tidak valid',
-                'email.unique'       => 'Email sudah terdaftar',
-                'password.required'  => 'Password wajib diisi',
-                'password.min'       => 'Password minimal 8 karakter',
+                'name.required' => 'Nama pengguna wajib diisi',
+                'email.required' => 'Email wajib diisi',
+                'email.email' => 'Email tidak valid',
+                'email.unique' => 'Email sudah terdaftar',
+                'password.required' => 'Password wajib diisi',
+                'password.min' => 'Password minimal 8 karakter',
                 'password.confirmed' => 'Konfirmasi password tidak sesuai',
-                'role.required'      => 'Role wajib dipilih',
-                'role.in'            => 'Role tidak valid',
+                'role.required' => 'Role wajib dipilih',
+                'role.in' => 'Role tidak valid',
             ]);
 
             User::create([
-                'name'     => $validated['name'],
-                'email'    => $validated['email'],
+                'name' => $validated['name'],
+                'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'role'     => $validated['role'],
+                'role' => $validated['role'],
             ]);
 
             return redirect()->route('admin.users.index')
@@ -64,7 +66,7 @@ class UserManagementController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal menambahkan pengguna: ' . $e->getMessage());
+                ->with('error', 'Gagal menambahkan pengguna: '.$e->getMessage());
         }
     }
 
@@ -76,7 +78,7 @@ class UserManagementController extends Controller
         try {
             return view('admin.users.show_new', compact('user'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memuat data pengguna: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memuat data pengguna: '.$e->getMessage());
         }
     }
 
@@ -88,7 +90,7 @@ class UserManagementController extends Controller
         try {
             return view('admin.users.edit_new', compact('user'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memuat form edit: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memuat form edit: '.$e->getMessage());
         }
     }
 
@@ -99,24 +101,24 @@ class UserManagementController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name'     => 'required|string|max:255',
-                'email'    => 'required|email|unique:users,email,' . $user->id,
-                'role'     => 'required|in:admin,guest',
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,'.$user->id,
+                'role' => 'required|in:admin,guest',
                 'password' => 'nullable|string|min:8|confirmed',
             ], [
-                'name.required'      => 'Nama pengguna wajib diisi',
-                'email.required'     => 'Email wajib diisi',
-                'email.email'        => 'Email tidak valid',
-                'email.unique'       => 'Email sudah terdaftar',
-                'role.required'      => 'Role wajib dipilih',
-                'role.in'            => 'Role tidak valid',
-                'password.min'       => 'Password minimal 8 karakter',
+                'name.required' => 'Nama pengguna wajib diisi',
+                'email.required' => 'Email wajib diisi',
+                'email.email' => 'Email tidak valid',
+                'email.unique' => 'Email sudah terdaftar',
+                'role.required' => 'Role wajib dipilih',
+                'role.in' => 'Role tidak valid',
+                'password.min' => 'Password minimal 8 karakter',
                 'password.confirmed' => 'Konfirmasi password tidak sesuai',
             ]);
 
-            $user->name  = $validated['name'];
+            $user->name = $validated['name'];
             $user->email = $validated['email'];
-            $user->role  = $validated['role'];
+            $user->role = $validated['role'];
 
             if ($request->filled('password')) {
                 $user->password = Hash::make($validated['password']);
@@ -129,7 +131,7 @@ class UserManagementController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal memperbarui pengguna: ' . $e->getMessage());
+                ->with('error', 'Gagal memperbarui pengguna: '.$e->getMessage());
         }
     }
 
@@ -151,7 +153,7 @@ class UserManagementController extends Controller
                 ->with('success', 'Pengguna berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal menghapus pengguna: ' . $e->getMessage());
+                ->with('error', 'Gagal menghapus pengguna: '.$e->getMessage());
         }
     }
 
@@ -177,7 +179,7 @@ class UserManagementController extends Controller
                 ->with('success', 'Role pengguna berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal memperbarui role: ' . $e->getMessage());
+                ->with('error', 'Gagal memperbarui role: '.$e->getMessage());
         }
     }
 }

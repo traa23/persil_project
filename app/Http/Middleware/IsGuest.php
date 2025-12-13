@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -9,7 +10,7 @@ class IsGuest
 {
     /**
      * Handle an incoming request.
-     * 
+     *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     /* IsGuest → hanya izinkan user yang role-nya guest */

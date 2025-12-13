@@ -10,6 +10,7 @@ class PersilController extends Controller
     public function index()
     {
         $persils = Persil::with('pemilik')->latest()->paginate(10);
+
         return view('guest.persil.index', compact('persils'));
     }
 
@@ -37,12 +38,14 @@ class PersilController extends Controller
     public function show(string $id)
     {
         $persil = Persil::with(['pemilik', 'dokumen', 'peta', 'sengketa'])->findOrFail($id);
+
         return view('guest.persil.show', compact('persil'));
     }
 
     public function edit(string $id)
     {
         $persil = Persil::findOrFail($id);
+
         return view('guest.persil.edit', compact('persil'));
     }
 
@@ -51,7 +54,7 @@ class PersilController extends Controller
         $persil = Persil::findOrFail($id);
 
         $request->validate([
-            'kode_persil' => 'required|string|max:50|unique:persil,kode_persil,' . $id . ',persil_id',
+            'kode_persil' => 'required|string|max:50|unique:persil,kode_persil,'.$id.',persil_id',
             'luas_m2' => 'nullable|numeric|min:0',
             'penggunaan' => 'nullable|string|max:100',
             'alamat_lahan' => 'nullable|string',

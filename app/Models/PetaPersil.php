@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PetaPersil extends Model
 {
     protected $table = 'peta_persil';
+
     protected $primaryKey = 'peta_id';
 
     protected $fillable = [

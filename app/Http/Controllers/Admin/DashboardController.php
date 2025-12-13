@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -14,18 +15,18 @@ class DashboardController extends Controller
     {
         try {
             $stats = [
-                'total_users'  => User::count(),
+                'total_users' => User::count(),
                 'total_admins' => User::where('role', 'admin')->count(),
                 'total_guests' => User::where('role', 'guest')->count(),
                 'total_persil' => Persil::count(),
             ];
 
-            $recent_users  = User::latest()->take(5)->get();
+            $recent_users = User::latest()->take(5)->get();
             $recent_persil = Persil::latest()->take(5)->get();
 
             return view('admin.dashboard_new', compact('stats', 'recent_users', 'recent_persil'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memuat dashboard: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memuat dashboard: '.$e->getMessage());
         }
     }
 }

@@ -13,12 +13,14 @@ class DokumenPersilController extends Controller
     public function index()
     {
         $dokumens = DokumenPersil::with('persil')->latest()->get();
+
         return view('guest.dokumen_persil.index', compact('dokumens'));
     }
 
     public function create()
     {
         $persils = Persil::orderBy('kode_persil')->get();
+
         return view('guest.dokumen_persil.create', compact('persils'));
     }
 
@@ -66,7 +68,7 @@ class DokumenPersilController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -117,13 +119,14 @@ class DokumenPersilController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
     public function show(string $id)
     {
         $dokumen = DokumenPersil::with('persil')->findOrFail($id);
+
         return view('guest.dokumen_persil.show', compact('dokumen'));
     }
 
@@ -131,6 +134,7 @@ class DokumenPersilController extends Controller
     {
         $dokumen = DokumenPersil::findOrFail($id);
         $persils = Persil::orderBy('kode_persil')->get();
+
         return view('guest.dokumen_persil.edit', compact('dokumen', 'persils'));
     }
 
@@ -178,7 +182,7 @@ class DokumenPersilController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -198,7 +202,7 @@ class DokumenPersilController extends Controller
                 ->route('guest.persil.show', $persilId)
                 ->with('success', 'Dokumen berhasil dihapus!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat menghapus dokumen: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus dokumen: '.$e->getMessage());
         }
     }
 }

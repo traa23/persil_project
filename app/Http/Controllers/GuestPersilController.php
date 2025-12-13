@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Persil;
@@ -41,7 +42,7 @@ class GuestPersilController extends Controller
 
             return view('guest.persil.index', compact('persils'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat memuat data: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat data: '.$e->getMessage());
         }
     }
 
@@ -61,25 +62,25 @@ class GuestPersilController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'kode_persil'     => 'required|string|max:50|unique:persil,kode_persil',
-                'luas_m2'         => 'nullable|numeric|min:0',
-                'penggunaan'      => 'nullable|string|max:100',
-                'alamat_lahan'    => 'nullable|string',
-                'rt'              => 'nullable|string|max:5',
-                'rw'              => 'nullable|string|max:5',
-                'files.*'         => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+                'kode_persil' => 'required|string|max:50|unique:persil,kode_persil',
+                'luas_m2' => 'nullable|numeric|min:0',
+                'penggunaan' => 'nullable|string|max:100',
+                'alamat_lahan' => 'nullable|string',
+                'rt' => 'nullable|string|max:5',
+                'rw' => 'nullable|string|max:5',
+                'files.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
                 'jenis_dokumen.*' => 'nullable|string|max:100',
-                'owner_photo'     => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+                'owner_photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             ], [
                 'kode_persil.required' => 'Kode persil wajib diisi',
-                'kode_persil.unique'   => 'Kode persil sudah terdaftar',
-                'luas_m2.numeric'      => 'Luas harus berupa angka',
-                'luas_m2.min'          => 'Luas tidak boleh negatif',
-                'files.*.mimes'        => 'Format file harus: PDF, DOC, DOCX, JPG, JPEG, PNG',
-                'files.*.max'          => 'Ukuran file maksimal 5MB',
-                'owner_photo.image'    => 'File harus berupa gambar',
-                'owner_photo.mimes'    => 'Format foto harus: JPG, JPEG, PNG',
-                'owner_photo.max'      => 'Ukuran foto maksimal 2MB',
+                'kode_persil.unique' => 'Kode persil sudah terdaftar',
+                'luas_m2.numeric' => 'Luas harus berupa angka',
+                'luas_m2.min' => 'Luas tidak boleh negatif',
+                'files.*.mimes' => 'Format file harus: PDF, DOC, DOCX, JPG, JPEG, PNG',
+                'files.*.max' => 'Ukuran file maksimal 5MB',
+                'owner_photo.image' => 'File harus berupa gambar',
+                'owner_photo.mimes' => 'Format foto harus: JPG, JPEG, PNG',
+                'owner_photo.max' => 'Ukuran foto maksimal 2MB',
             ]);
 
             if ($validator->fails()) {
@@ -105,8 +106,8 @@ class GuestPersilController extends Controller
             $adminUser = User::where('role', 'admin')->first();
             if ($adminUser) {
                 // Buat copy data untuk admin dengan kode yang berbeda
-                $adminData                     = $data;
-                $adminData['kode_persil']      = $data['kode_persil'] . '_ADMIN_SYNC';
+                $adminData = $data;
+                $adminData['kode_persil'] = $data['kode_persil'].'_ADMIN_SYNC';
                 $adminData['pemilik_warga_id'] = $adminUser->id;
 
                 try {
@@ -139,11 +140,11 @@ class GuestPersilController extends Controller
                     $filePath = $file->store('dokumen_persil', 'public');
 
                     \App\Models\DokumenPersil::create([
-                        'persil_id'     => $persil->persil_id,
+                        'persil_id' => $persil->persil_id,
                         'jenis_dokumen' => $request->jenis_dokumen[$index] ?? 'Dokumen',
-                        'nomor'         => $request->nomor[$index] ?? null,
-                        'keterangan'    => $request->keterangan[$index] ?? null,
-                        'file_path'     => $filePath,
+                        'nomor' => $request->nomor[$index] ?? null,
+                        'keterangan' => $request->keterangan[$index] ?? null,
+                        'file_path' => $filePath,
                     ]);
 
                     $uploadedCount++;
@@ -160,7 +161,7 @@ class GuestPersilController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -179,7 +180,7 @@ class GuestPersilController extends Controller
 
             return view('guest.persil.show', compact('persil'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
+            return back()->with('error', 'Data tidak ditemukan: '.$e->getMessage());
         }
     }
 
@@ -198,7 +199,7 @@ class GuestPersilController extends Controller
 
             return view('guest.persil.edit', compact('persil'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
+            return back()->with('error', 'Data tidak ditemukan: '.$e->getMessage());
         }
     }
 
@@ -216,21 +217,21 @@ class GuestPersilController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'kode_persil'  => 'required|string|max:50|unique:persil,kode_persil,' . $id . ',persil_id',
-                'luas_m2'      => 'nullable|numeric|min:0',
-                'penggunaan'   => 'nullable|string|max:100',
+                'kode_persil' => 'required|string|max:50|unique:persil,kode_persil,'.$id.',persil_id',
+                'luas_m2' => 'nullable|numeric|min:0',
+                'penggunaan' => 'nullable|string|max:100',
                 'alamat_lahan' => 'nullable|string',
-                'rt'           => 'nullable|string|max:5',
-                'rw'           => 'nullable|string|max:5',
-                'owner_photo'  => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+                'rt' => 'nullable|string|max:5',
+                'rw' => 'nullable|string|max:5',
+                'owner_photo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             ], [
                 'kode_persil.required' => 'Kode persil wajib diisi',
-                'kode_persil.unique'   => 'Kode persil sudah terdaftar',
-                'luas_m2.numeric'      => 'Luas harus berupa angka',
-                'luas_m2.min'          => 'Luas tidak boleh negatif',
-                'owner_photo.image'    => 'File harus berupa gambar',
-                'owner_photo.mimes'    => 'Format foto harus: JPG, JPEG, PNG',
-                'owner_photo.max'      => 'Ukuran foto maksimal 2MB',
+                'kode_persil.unique' => 'Kode persil sudah terdaftar',
+                'luas_m2.numeric' => 'Luas harus berupa angka',
+                'luas_m2.min' => 'Luas tidak boleh negatif',
+                'owner_photo.image' => 'File harus berupa gambar',
+                'owner_photo.mimes' => 'Format foto harus: JPG, JPEG, PNG',
+                'owner_photo.max' => 'Ukuran foto maksimal 2MB',
             ]);
 
             if ($validator->fails()) {
@@ -268,7 +269,7 @@ class GuestPersilController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -290,7 +291,7 @@ class GuestPersilController extends Controller
             return redirect()->route('guest.persil.index')
                 ->with('success', 'Data persil berhasil dihapus!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus data: '.$e->getMessage());
         }
     }
 }

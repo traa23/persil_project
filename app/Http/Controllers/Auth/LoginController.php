@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -11,17 +12,18 @@ class LoginController extends Controller
     {
         return view('auth.login');
     }
-    //fuction login dimana jika berhasil login akan diarahkan sesuai role masing-masing
+
+    // fuction login dimana jika berhasil login akan diarahkan sesuai role masing-masing
     public function login(Request $request)
     {
         \Log::info('Login attempt', [
-            'email'          => $request->input('email'),
-            'session_id'     => session()->getId(),
+            'email' => $request->input('email'),
+            'session_id' => session()->getId(),
             'has_csrf_token' => $request->has('_token'),
         ]);
 
         $credentials = $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
@@ -29,8 +31,8 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             \Log::info('Login successful', [
-                'user_id'        => Auth::id(),
-                'role'           => Auth::user()->role,
+                'user_id' => Auth::id(),
+                'role' => Auth::user()->role,
                 'new_session_id' => session()->getId(),
             ]);
 
@@ -50,6 +52,7 @@ class LoginController extends Controller
             'email' => 'Email atau password tidak sesuai.',
         ])->onlyInput('email');
     }
+
     // fuction logout dimana jika logout akan kembali ke halaman login
     public function logout(Request $request)
     {
@@ -57,7 +60,8 @@ class LoginController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-    //mengarahkan ke halaman login setelah logout
+
+        // mengarahkan ke halaman login setelah logout
         return redirect()->route('login');
     }
 }

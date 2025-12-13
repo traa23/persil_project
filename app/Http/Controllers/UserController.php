@@ -30,7 +30,7 @@ class UserController extends Controller
 
             return view('guest.users.index', compact('users'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat memuat data: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat memuat data: '.$e->getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -102,9 +102,10 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+
             return view('guest.users.show', compact('user'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
+            return back()->with('error', 'Data tidak ditemukan: '.$e->getMessage());
         }
     }
 
@@ -115,9 +116,10 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+
             return view('guest.users.edit', compact('user'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
+            return back()->with('error', 'Data tidak ditemukan: '.$e->getMessage());
         }
     }
 
@@ -131,7 +133,7 @@ class UserController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email,' . $id,
+                'email' => 'required|email|unique:users,email,'.$id,
                 'password' => 'nullable|string|min:8|confirmed',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ], [
@@ -178,7 +180,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -199,7 +201,7 @@ class UserController extends Controller
             return redirect()->route('users.index')
                 ->with('success', 'Data user berhasil dihapus!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus data: '.$e->getMessage());
         }
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DokumenPersil extends Model
 {
     protected $table = 'dokumen_persil';
+
     protected $primaryKey = 'dokumen_id';
 
     protected $fillable = [
