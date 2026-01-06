@@ -17,11 +17,25 @@ class SengketaPersil extends Model
         'kronologi',
         'status',
         'penyelesaian',
-        'bukti_sengketa',
     ];
+
+    // Status enum values: pending, proses, selesai
+    const STATUS_PENDING = 'pending';
+    const STATUS_PROSES  = 'proses';
+    const STATUS_SELESAI = 'selesai';
 
     public function persil()
     {
         return $this->belongsTo(Persil::class, 'persil_id', 'persil_id');
+    }
+
+    /**
+     * Media files (bukti sengketa)
+     */
+    public function media()
+    {
+        return $this->hasMany(Media::class, 'ref_id', 'sengketa_id')
+            ->where('ref_table', 'sengketa_persil')
+            ->orderBy('sort_order');
     }
 }

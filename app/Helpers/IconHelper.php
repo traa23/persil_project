@@ -227,4 +227,28 @@ class IconHelper
         // Default color
         return 'text-gray-400';
     }
+
+    /**
+     * Get route prefix based on user role
+     * Returns 'admin' untuk admin dan super_admin
+     * Ini digunakan untuk view agar route names bekerja untuk kedua role
+     */
+    public static function getRoutePrefix()
+    {
+        if (! auth()->check()) {
+            return 'admin';
+        }
+
+        $role = auth()->user()->role;
+
+        // OLD CODE (DEPRECATED - untuk referensi):
+        // return $role === 'super_admin' ? 'super-admin' : 'admin';
+        // Tapi dengan route naming convention yang ada, kita perlu gunakan 'admin' untuk super-admin juga
+        // atau ubah views untuk menggunakan conditional route names
+
+        // Sekarang: gunakan logic yang sesuai dengan view
+        // Jika super_admin, kembalikan 'admin' karena views masih hardcoded 'admin.'
+        // dan routes super_admin punya name prefix 'super-admin.' tapi di super-admin.peta.create dst
+        return $role === 'super_admin' ? 'super-admin' : 'admin';
+    }
 }

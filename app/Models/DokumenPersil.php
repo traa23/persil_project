@@ -15,11 +15,20 @@ class DokumenPersil extends Model
         'jenis_dokumen',
         'nomor',
         'keterangan',
-        'file_dokumen',
     ];
 
     public function persil()
     {
         return $this->belongsTo(Persil::class, 'persil_id', 'persil_id');
+    }
+
+    /**
+     * Media files for this dokumen
+     */
+    public function media()
+    {
+        return $this->hasMany(Media::class, 'ref_id', 'dokumen_id')
+            ->where('ref_table', 'dokumen_persil')
+            ->orderBy('sort_order');
     }
 }

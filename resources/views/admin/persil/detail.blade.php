@@ -19,7 +19,7 @@
                             <div class="relative group">
                                 <img src="{{ asset('storage/' . $foto->file_path) }}" alt="Foto Persil" class="w-full h-64 object-cover rounded-lg shadow">
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                                    <form id="fotoDeleteForm-{{ $foto->id }}" action="{{ route('admin.foto.delete', $foto->id) }}" method="POST">
+                                    <form id="fotoDeleteForm-{{ $foto->id }}" action="{{ getAdminRoute('foto.delete', $foto->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" onclick="showConfirm('Hapus foto ini?', document.getElementById('fotoDeleteForm-{{ $foto->id }}'))" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium transition">
@@ -30,7 +30,7 @@
                             </div>
                         @endforeach
                     </div>
-                    <a href="{{ route('admin.persil.edit', $persil->persil_id) }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <a href="{{ getAdminRoute('persil.edit', $persil->persil_id) }}" class="text-blue-600 hover:text-blue-800 text-sm">
                         <i class="fas fa-plus"></i> Tambah Foto
                     </a>
                 </div>
@@ -58,10 +58,10 @@
             </div>
 
             <div class="mt-6 flex gap-2">
-                <a href="{{ route('admin.persil.edit', $persil->persil_id) }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium transition">
+                <a href="{{ getAdminRoute('persil.edit', $persil->persil_id) }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium transition">
                     <i class="fas fa-edit mr-2"></i>Edit
                 </a>
-                <form id="deleteForm" action="{{ route('admin.persil.delete', $persil->persil_id) }}" method="POST" class="inline-block">
+                <form id="deleteForm" action="{{ getAdminRoute('persil.delete', $persil->persil_id) }}" method="POST" class="inline-block">
                     @csrf
                     @method('DELETE')
                     <button type="button" onclick="showConfirm('Apakah Anda yakin ingin menghapus persil ini beserta semua data terkait?', document.getElementById('deleteForm'))" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition">
@@ -78,7 +78,7 @@
                     <i class="fas fa-file-alt mr-2 text-blue-600"></i>
                     Dokumen Persil
                 </h3>
-                <a href="{{ route('admin.dokumen.create', $persil->persil_id) }}" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                <a href="{{ getAdminRoute('dokumen.create', $persil->persil_id) }}" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
                     <i class="fas fa-plus"></i> Tambah
                 </a>
             </div>
@@ -175,7 +175,7 @@
                                         @endif
                                     </td>
                                     <td class="px-3 py-2">
-                                        <form action="{{ route('admin.dokumen.delete', $dokumen->dokumen_id) }}" method="POST" class="inline-block" onclick="return confirm('Yakin ingin menghapus?')">
+                                        <form action="{{ getAdminRoute('dokumen.delete', $dokumen->dokumen_id) }}" method="POST" class="inline-block" onclick="return confirm('Yakin ingin menghapus?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-700">
@@ -200,7 +200,7 @@
                     <i class="fas fa-map-marked-alt mr-2 text-green-600"></i>
                     Peta Persil
                 </h3>
-                <a href="{{ route('admin.peta.create', $persil->persil_id) }}" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                <a href="{{ getAdminRoute('peta.create', $persil->persil_id) }}" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
                     <i class="fas fa-plus"></i> Kelola
                 </a>
             </div>
@@ -246,7 +246,7 @@
                     <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
                     Sengketa Persil
                 </h3>
-                <a href="{{ route('admin.sengketa.create', $persil->persil_id) }}" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                <a href="{{ getAdminRoute('sengketa.create', $persil->persil_id) }}" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
                     <i class="fas fa-plus"></i> Tambah
                 </a>
             </div>

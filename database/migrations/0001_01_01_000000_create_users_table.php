@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'guest'])->default('guest');
+            $table->enum('role', ['admin', 'super_admin', 'guest', 'user'])->default('guest');
             $table->unsignedBigInteger('admin_id')->nullable()->comment('Reference to admin user if role is guest');
             $table->foreign('admin_id')->references('id')->on('users')->onDelete('cascade');
             $table->rememberToken();

@@ -2,9 +2,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\FotoPersil;
-use App\Models\JenisPenggunaan;
 use App\Models\Persil;
 use App\Models\User;
+use App\Models\Warga;
 use App\Services\AdminInheritanceService;
 use Illuminate\Http\Request;
 
@@ -13,16 +13,14 @@ class AdminController extends Controller
     public function dashboard()
     {
         $totalPersil  = Persil::count();
-        $totalGuest   = User::where('role', 'guest')->where('admin_id', auth()->id())->count();
-        $recentPersil = Persil::where('pemilik_warga_id', auth()->id())
-            ->orWhereHas('pemilik', function ($q) {
-                $q->where('admin_id', auth()->id());
-            })
+        $totalUser    = User::where('role', 'user')->count();
+        $totalWarga   = Warga::count();
+        $recentPersil = Persil::with('pemilik')
             ->latest()
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact('totalPersil', 'totalGuest', 'recentPersil'));
+        return view('admin.dashboard', compact('totalPersil', 'totalUser', 'totalWarga', 'recentPersil'));
     }
 
     // Persil Management
@@ -30,18 +28,16 @@ class AdminController extends Controller
     {
         $search = request('search');
 
-        $persils = Persil::with('pemilik', 'jenisPenggunaan');
+        $persils = Persil::with('pemilik');
 
         // Apply search filter
         if ($search) {
             $persils->where(function ($query) use ($search) {
                 $query->where('kode_persil', 'LIKE', '%' . $search . '%')
                     ->orWhere('alamat_lahan', 'LIKE', '%' . $search . '%')
+                    ->orWhere('penggunaan', 'LIKE', '%' . $search . '%')
                     ->orWhereHas('pemilik', function ($q) use ($search) {
-                        $q->where('name', 'LIKE', '%' . $search . '%');
-                    })
-                    ->orWhereHas('jenisPenggunaan', function ($q) use ($search) {
-                        $q->where('nama_penggunaan', 'LIKE', '%' . $search . '%');
+                        $q->where('nama', 'LIKE', '%' . $search . '%');
                     });
             });
         }
@@ -53,7 +49,7 @@ class AdminController extends Controller
 
     public function persilDetail($id)
     {
-        $persil = Persil::with('pemilik', 'jenisPenggunaan', 'dokumenPersil', 'petaPersil', 'sengketa', 'fotoPersil')
+        $persil = Persil::with('pemilik', 'dokumenPersil', 'petaPersil', 'sengketa', 'fotoPersil', 'media')
             ->findOrFail($id);
 
         return view('admin.persil.detail', compact('persil'));
@@ -61,42 +57,31 @@ class AdminController extends Controller
 
     public function persilCreate()
     {
-        $jenisPenggunaan = JenisPenggunaan::all();
-        $guests          = User::where('role', 'guest')->get();
+        $wargaList = Warga::orderBy('nama')->get();
 
-        return view('admin.persil.create', compact('jenisPenggunaan', 'guests'));
+        return view('admin.persil.create', compact('wargaList'));
     }
 
     public function persilStore(Request $request)
     {
         $validated = $request->validate([
-            'kode_persil'             => 'required|unique:persil',
-            'pemilik_warga_id'        => 'required|exists:users,id',
-            'luas_m2'                 => 'required|numeric',
-            'jenis_penggunaan_custom' => 'required|string',
-            'alamat_lahan'            => 'required',
-            'rt'                      => 'nullable|integer',
-            'rw'                      => 'nullable|integer',
-            'foto_persil'             => 'nullable|array',
-            'foto_persil.*'           => 'image|max:2048',
+            'kode_persil'      => 'required|unique:persil',
+            'pemilik_warga_id' => 'required|exists:warga,warga_id',
+            'luas_m2'          => 'required|numeric',
+            'penggunaan'       => 'required|string',
+            'alamat_lahan'     => 'required',
+            'rt'               => 'nullable|string|max:3',
+            'rw'               => 'nullable|string|max:3',
+            'foto_persil'      => 'nullable|array',
+            'foto_persil.*'    => 'image|max:2048',
         ]);
-
-        // Handle jenis penggunaan - cari atau buat baru
-        $jenisPenggunaan = JenisPenggunaan::where('nama_penggunaan', $validated['jenis_penggunaan_custom'])->first();
-
-        if (! $jenisPenggunaan) {
-            // Jika tidak ada, buat yang baru
-            $jenisPenggunaan = JenisPenggunaan::create([
-                'nama_penggunaan' => $validated['jenis_penggunaan_custom'],
-            ]);
-        }
 
         // Siapkan data untuk disimpan
         $persilData = [
             'kode_persil'      => $validated['kode_persil'],
             'pemilik_warga_id' => $validated['pemilik_warga_id'],
             'luas_m2'          => $validated['luas_m2'],
-            'jenis_id'         => $jenisPenggunaan->jenis_id,
+            'penggunaan'       => $validated['penggunaan'],
             'alamat_lahan'     => $validated['alamat_lahan'],
             'rt'               => $validated['rt'],
             'rw'               => $validated['rw'],
@@ -124,11 +109,10 @@ class AdminController extends Controller
 
     public function persilEdit($id)
     {
-        $persil          = Persil::findOrFail($id);
-        $jenisPenggunaan = JenisPenggunaan::all();
-        $guests          = User::where('role', 'guest')->get();
+        $persil    = Persil::findOrFail($id);
+        $wargaList = Warga::orderBy('nama')->get();
 
-        return view('admin.persil.edit', compact('persil', 'jenisPenggunaan', 'guests'));
+        return view('admin.persil.edit', compact('persil', 'wargaList'));
     }
 
     public function persilUpdate(Request $request, $id)
@@ -136,33 +120,23 @@ class AdminController extends Controller
         $persil = Persil::findOrFail($id);
 
         $validated = $request->validate([
-            'kode_persil'             => 'required|unique:persil,kode_persil,' . $id . ',persil_id',
-            'pemilik_warga_id'        => 'required|exists:users,id',
-            'luas_m2'                 => 'required|numeric',
-            'jenis_penggunaan_custom' => 'required|string',
-            'alamat_lahan'            => 'required',
-            'rt'                      => 'nullable|integer',
-            'rw'                      => 'nullable|integer',
-            'foto_persil'             => 'nullable|array',
-            'foto_persil.*'           => 'image|max:2048',
+            'kode_persil'      => 'required|unique:persil,kode_persil,' . $id . ',persil_id',
+            'pemilik_warga_id' => 'required|exists:warga,warga_id',
+            'luas_m2'          => 'required|numeric',
+            'penggunaan'       => 'required|string',
+            'alamat_lahan'     => 'required',
+            'rt'               => 'nullable|string|max:3',
+            'rw'               => 'nullable|string|max:3',
+            'foto_persil'      => 'nullable|array',
+            'foto_persil.*'    => 'image|max:2048',
         ]);
-
-        // Handle jenis penggunaan - cari atau buat baru
-        $jenisPenggunaan = JenisPenggunaan::where('nama_penggunaan', $validated['jenis_penggunaan_custom'])->first();
-
-        if (! $jenisPenggunaan) {
-            // Jika tidak ada, buat yang baru
-            $jenisPenggunaan = JenisPenggunaan::create([
-                'nama_penggunaan' => $validated['jenis_penggunaan_custom'],
-            ]);
-        }
 
         // Siapkan data untuk diupdate
         $persilData = [
             'kode_persil'      => $validated['kode_persil'],
             'pemilik_warga_id' => $validated['pemilik_warga_id'],
             'luas_m2'          => $validated['luas_m2'],
-            'jenis_id'         => $jenisPenggunaan->jenis_id,
+            'penggunaan'       => $validated['penggunaan'],
             'alamat_lahan'     => $validated['alamat_lahan'],
             'rt'               => $validated['rt'],
             'rw'               => $validated['rw'],
@@ -212,85 +186,84 @@ class AdminController extends Controller
         return back()->with('success', 'Foto berhasil dihapus');
     }
 
-    // User Guest Management
-    public function guestList()
+    // Warga Management (menggantikan Guest Management)
+    public function wargaList()
     {
         $search = request('search');
 
-        $guests = User::where('role', 'guest');
+        $wargaList = Warga::query();
 
         // Apply search filter
         if ($search) {
-            $guests->where(function ($query) use ($search) {
-                $query->where('name', 'LIKE', '%' . $search . '%')
+            $wargaList->where(function ($query) use ($search) {
+                $query->where('nama', 'LIKE', '%' . $search . '%')
+                    ->orWhere('no_ktp', 'LIKE', '%' . $search . '%')
                     ->orWhere('email', 'LIKE', '%' . $search . '%');
             });
         }
 
-        $guests = $guests->paginate(15)->appends(request()->query());
+        $wargaList = $wargaList->paginate(15)->appends(request()->query());
 
-        return view('admin.guest.index', compact('guests', 'search'));
+        return view('admin.warga.index', compact('wargaList', 'search'));
     }
 
-    public function guestCreate()
+    public function wargaCreate()
     {
-        return view('admin.guest.create');
+        return view('admin.warga.create');
     }
 
-    public function guestStore(Request $request)
+    public function wargaStore(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'no_ktp'        => 'required|string|size:16|unique:warga,no_ktp',
+            'nama'          => 'required|string|max:255',
+            'jenis_kelamin' => 'required|in:L,P',
+            'agama'         => 'required|string|max:50',
+            'pekerjaan'     => 'required|string|max:100',
+            'telp'          => 'nullable|string|max:20',
+            'email'         => 'nullable|email|max:255',
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
-        $validated['role']     = 'guest';
-        $validated['admin_id'] = auth()->id();
+        Warga::create($validated);
 
-        User::create($validated);
-
-        return redirect()->route('admin.guest.list')->with('success', 'Akun guest berhasil dibuat');
+        return redirect()->route('admin.warga.list')->with('success', 'Data warga berhasil ditambahkan');
     }
 
-    public function guestEdit($id)
+    public function wargaEdit($id)
     {
-        $guest = User::findOrFail($id);
+        $warga = Warga::findOrFail($id);
 
-        return view('admin.guest.edit', compact('guest'));
+        return view('admin.warga.edit', compact('warga'));
     }
 
-    public function guestUpdate(Request $request, $id)
+    public function wargaUpdate(Request $request, $id)
     {
-        $guest = User::findOrFail($id);
+        $warga = Warga::findOrFail($id);
 
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users,email,' . $guest->id,
-            'password' => 'nullable|string|min:6|confirmed',
+            'no_ktp'        => 'required|string|size:16|unique:warga,no_ktp,' . $id . ',warga_id',
+            'nama'          => 'required|string|max:255',
+            'jenis_kelamin' => 'required|in:L,P',
+            'agama'         => 'required|string|max:50',
+            'pekerjaan'     => 'required|string|max:100',
+            'telp'          => 'nullable|string|max:20',
+            'email'         => 'nullable|email|max:255',
         ]);
 
-        if (empty($validated['password'])) {
-            unset($validated['password']);
-        } else {
-            $validated['password'] = bcrypt($validated['password']);
-        }
+        $warga->update($validated);
 
-        $guest->update($validated);
-
-        return redirect()->route('admin.guest.list')->with('success', 'Data guest berhasil diperbarui');
+        return redirect()->route('admin.warga.list')->with('success', 'Data warga berhasil diperbarui');
     }
 
-    public function guestDelete($id)
+    public function wargaDelete($id)
     {
-        $guest = User::findOrFail($id);
-        $guest->delete();
+        $warga = Warga::findOrFail($id);
+        $warga->delete();
 
-        return redirect()->route('admin.guest.list')->with('success', 'Akun guest berhasil dihapus');
+        return redirect()->route('admin.warga.list')->with('success', 'Data warga berhasil dihapus');
     }
 
-    // User Management (Create any user with role selection)
+    // User Management (Create admin/user only - no guest)
     public function userCreate()
     {
         return view('admin.user.create');
@@ -302,15 +275,12 @@ class AdminController extends Controller
             'name'     => 'required|string',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6|confirmed',
-            'role'     => 'required|in:admin,guest',
+            'role'     => 'required|in:admin,user',
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
 
-        // Jika role guest, tambah admin_id dari current admin
-        if ($validated['role'] === 'guest') {
-            $validated['admin_id'] = auth()->id();
-        } elseif ($validated['role'] === 'admin') {
+        if ($validated['role'] === 'admin') {
             // Jika role admin, set parent_admin_id dari current admin
             $validated['parent_admin_id'] = auth()->id();
         }
@@ -332,7 +302,7 @@ class AdminController extends Controller
             }
         }
 
-        $roleLabel = $validated['role'] === 'admin' ? 'Admin' : 'Guest';
+        $roleLabel = $validated['role'] === 'admin' ? 'Admin' : 'User';
         return back()->with('success', 'Akun ' . $roleLabel . ' berhasil dibuat');
     }
 }

@@ -120,9 +120,9 @@
                     <span>Data Persil</span>
                 </a>
 
-                <a href="{{ route('admin.guest.list') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.guest.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
-                    <i class="fas fa-users"></i>
-                    <span>Kelola Guest</span>
+                <a href="{{ route('admin.warga.list') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.warga.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                    <i class="fas fa-id-card"></i>
+                    <span>Kelola Warga</span>
                 </a>
 
                 <a href="{{ route('admin.user.create') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.user.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">

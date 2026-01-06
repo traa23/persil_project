@@ -6,12 +6,12 @@
 @section('content')
 <div class="mb-6">
     <div class="flex gap-4 items-center">
-        <a href="{{ route('admin.persil.create') }}" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-medium transition">
+        <a href="{{ getAdminRoute('persil.create') }}" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-medium transition">
             <i class="fas fa-plus mr-2"></i>Tambah Data Persil
         </a>
 
         <!-- Search Form -->
-        <form method="GET" action="{{ route('admin.persil.list') }}" class="flex-1 flex gap-2">
+        <form method="GET" action="{{ getAdminRoute('persil.list') }}" class="flex-1 flex gap-2">
             <div class="flex-1 relative">
                 <input
                     type="text"
@@ -26,7 +26,7 @@
                 <i class="fas fa-search mr-2"></i>Cari
             </button>
             @if($search)
-                <a href="{{ route('admin.persil.list') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium transition">
+                <a href="{{ getAdminRoute('persil.list') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-medium transition">
                     <i class="fas fa-times mr-2"></i>Reset
                 </a>
             @endif
@@ -63,13 +63,13 @@
                         <td class="px-4 py-3 text-sm">{{ number_format($persil->luas_m2, 2) }}</td>
                         <td class="px-4 py-3 text-sm">{{ $persil->jenisPenggunaan->nama_penggunaan ?? '-' }}</td>
                         <td class="px-4 py-3 text-sm space-x-2 flex items-center">
-                            <a href="{{ route('admin.persil.detail', $persil->persil_id) }}" class="text-green-600 hover:text-green-700 hover:scale-110 transition" title="Lihat Detail">
+                            <a href="{{ getAdminRoute('persil.detail', $persil->persil_id) }}" class="text-green-600 hover:text-green-700 hover:scale-110 transition" title="Lihat Detail">
                                 <i class="fas fa-eye text-lg"></i>
                             </a>
-                            <a href="{{ route('admin.persil.edit', $persil->persil_id) }}" class="text-blue-600 hover:text-blue-700 hover:scale-110 transition" title="Edit">
+                            <a href="{{ getAdminRoute('persil.edit', $persil->persil_id) }}" class="text-blue-600 hover:text-blue-700 hover:scale-110 transition" title="Edit">
                                 <i class="fas fa-edit text-lg"></i>
                             </a>
-                            <form id="deleteForm-{{ $persil->persil_id }}" action="{{ route('admin.persil.delete', $persil->persil_id) }}" method="POST" class="inline-block">
+                            <form id="deleteForm-{{ $persil->persil_id }}" action="{{ getAdminRoute('persil.delete', $persil->persil_id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" onclick="showConfirm('Hapus persil {{ $persil->kode_persil }}?', document.getElementById('deleteForm-{{ $persil->persil_id }}'))" class="text-red-600 hover:text-red-700 hover:scale-110 transition" title="Hapus">

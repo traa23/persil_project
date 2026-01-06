@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Admin')
-@section('page-title', 'Dashboard')
+@section('title', 'Dashboard Super Admin')
+@section('page-title', 'Dashboard Super Admin')
 
 @section('content')
 <!-- DASHBOARD STATS CARDS - Improved Mobile View -->
@@ -48,10 +48,10 @@
 
 <!-- Action Buttons -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-    <a href="{{ getAdminRoute('persil.create') }}" class="block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-center">
+    <a href="{{ route('super-admin.persil.create') }}" class="block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-center">
         <i class="fas fa-plus mr-2"></i> Tambah Persil
     </a>
-    <a href="{{ getAdminRoute('warga.create') }}" class="block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-center">
+    <a href="{{ route('super-admin.warga.create') }}" class="block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-center">
         <i class="fas fa-user-plus mr-2"></i> Tambah Warga
     </a>
 </div>
@@ -93,7 +93,7 @@
     @endif
 
     <div class="mt-6 pt-6 border-t">
-        <a href="{{ route('admin.persil.list') }}" class="text-purple-600 hover:text-purple-800 font-bold text-base transition">
+        <a href="{{ route('super-admin.persil.list') }}" class="text-purple-600 hover:text-purple-800 font-bold text-base transition">
             Lihat semua data persil <i class="fas fa-arrow-right ml-2"></i>
         </a>
     </div>

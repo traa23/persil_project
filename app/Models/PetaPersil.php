@@ -15,11 +15,24 @@ class PetaPersil extends Model
         'geojson',
         'panjang_m',
         'lebar_m',
-        'file_peta',
+    ];
+
+    protected $casts = [
+        'geojson' => 'json',
     ];
 
     public function persil()
     {
         return $this->belongsTo(Persil::class, 'persil_id', 'persil_id');
+    }
+
+    /**
+     * Media files for this peta
+     */
+    public function media()
+    {
+        return $this->hasMany(Media::class, 'ref_id', 'peta_id')
+            ->where('ref_table', 'peta_persil')
+            ->orderBy('sort_order');
     }
 }
