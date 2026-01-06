@@ -22,7 +22,8 @@
                                     <form id="fotoDeleteForm-{{ $foto->id }}" action="{{ getAdminRoute('foto.delete', $foto->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" onclick="showConfirm('Hapus foto ini?', document.getElementById('fotoDeleteForm-{{ $foto->id }}'))" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium transition">
+                                        {{-- OLD: showConfirm('Hapus foto ini?', document.getElementById('fotoDeleteForm-...')) --}}
+                                        <button type="button" onclick="confirmDelete('fotoDeleteForm-{{ $foto->id }}', 'Hapus foto ini?')" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium transition">
                                             <i class="fas fa-trash mr-2"></i>Hapus
                                         </button>
                                     </form>
@@ -64,7 +65,8 @@
                 <form id="deleteForm" action="{{ getAdminRoute('persil.delete', $persil->persil_id) }}" method="POST" class="inline-block">
                     @csrf
                     @method('DELETE')
-                    <button type="button" onclick="showConfirm('Apakah Anda yakin ingin menghapus persil ini beserta semua data terkait?', document.getElementById('deleteForm'))" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition">
+                    {{-- OLD: showConfirm('Apakah Anda yakin ingin menghapus persil ini beserta semua data terkait?', document.getElementById('deleteForm')) --}}
+                    <button type="button" onclick="confirmDelete('deleteForm', 'Apakah Anda yakin ingin menghapus persil ini beserta semua data terkait?')" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium transition">
                         <i class="fas fa-trash mr-2"></i>Hapus
                     </button>
                 </form>
@@ -175,10 +177,11 @@
                                         @endif
                                     </td>
                                     <td class="px-3 py-2">
-                                        <form action="{{ getAdminRoute('dokumen.delete', $dokumen->dokumen_id) }}" method="POST" class="inline-block" onclick="return confirm('Yakin ingin menghapus?')">
+                                        {{-- OLD: onclick="return confirm('Yakin ingin menghapus?')" --}}
+                                        <form id="dokumenDeleteForm-{{ $dokumen->dokumen_id }}" action="{{ getAdminRoute('dokumen.delete', $dokumen->dokumen_id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-700">
+                                            <button type="button" onclick="confirmDelete('dokumenDeleteForm-{{ $dokumen->dokumen_id }}', 'Yakin ingin menghapus dokumen ini?')" class="text-red-600 hover:text-red-700">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -231,7 +234,7 @@
                 @if ($persil->petaPersil->geojson)
                     <div class="mt-4 p-3 bg-gray-100 rounded text-sm">
                         <p class="font-semibold mb-2">GeoJSON:</p>
-                        <pre class="whitespace-pre-wrap break-words text-xs">{{ $persil->petaPersil->geojson }}</pre>
+                        <pre class="whitespace-pre-wrap break-words text-xs">{{ is_array($persil->petaPersil->geojson) ? json_encode($persil->petaPersil->geojson, JSON_PRETTY_PRINT) : $persil->petaPersil->geojson }}</pre>
                     </div>
                 @endif
             @else
@@ -264,7 +267,8 @@
                                     @endif">
                                     {{ ucfirst($sengketa->status) }}
                                 </span>
-                                <a href="{{ route('admin.sengketa.edit', $sengketa->sengketa_id) }}" class="text-blue-600 hover:text-blue-700">
+                                {{-- OLD: route('admin.sengketa.edit', $sengketa->sengketa_id) --}}
+                                <a href="{{ getAdminRoute('sengketa.edit', $sengketa->sengketa_id) }}" class="text-blue-600 hover:text-blue-700">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </div>
@@ -341,7 +345,8 @@
             </div>
         </div>
 
-        <a href="{{ route('admin.persil.list') }}" class="block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-center">
+        {{-- OLD: route('admin.persil.list') --}}
+        <a href="{{ getAdminRoute('persil.list') }}" class="block px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-center">
             <i class="fas fa-arrow-left mr-1"></i> Kembali
         </a>
     </div>

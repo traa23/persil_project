@@ -71,7 +71,8 @@
                             <form id="guestDeleteForm-{{ $guest->id }}" action="{{ getAdminRoute('guest.delete', $guest->id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" onclick="showConfirm('Hapus akun guest {{ $guest->name }}?', document.getElementById('guestDeleteForm-{{ $guest->id }}'))" class="text-red-600 hover:text-red-700 hover:scale-110 transition" title="Hapus">
+                                {{-- OLD: showConfirm('Hapus akun guest ...?', document.getElementById('guestDeleteForm-...')) --}}
+                                <button type="button" onclick="confirmDelete('guestDeleteForm-{{ $guest->id }}', 'Hapus akun guest {{ $guest->name }}?')" class="text-red-600 hover:text-red-700 hover:scale-110 transition" title="Hapus">
                                     <i class="fas fa-trash text-lg"></i>
                                 </button>
                             </form>

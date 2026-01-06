@@ -5,7 +5,8 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-    <form action="{{ route('admin.persil.update', $persil->persil_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    {{-- OLD: route('admin.persil.update', $persil->persil_id) --}}
+    <form action="{{ getAdminRoute('persil.update', $persil->persil_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
 
@@ -39,13 +40,17 @@
                     class="w-full px-4 py-2 border @error('pemilik_warga_id') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     required
                 >
-                    <option value="">-- Pilih Warga/Guest --</option>
-                    @foreach ($guests as $guest)
-                        <option value="{{ $guest->id }}" {{ old('pemilik_warga_id', $persil->pemilik_warga_id) == $guest->id ? 'selected' : '' }}>
-                            {{ $guest->name }}
+                    <option value="">-- Pilih Warga --</option>
+                    @foreach ($wargaList as $warga)
+                        <option value="{{ $warga->warga_id }}" {{ old('pemilik_warga_id', $persil->pemilik_warga_id) == $warga->warga_id ? 'selected' : '' }}>
+                            {{ $warga->nama }} {{ $warga->email ? '(' . $warga->email . ')' : '' }}
                         </option>
                     @endforeach
                 </select>
+                <p class="text-gray-500 text-xs mt-1">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Pilih warga yang memiliki email untuk menghubungkan dengan akun user.
+                </p>
                 @error('pemilik_warga_id')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -311,13 +316,14 @@
                         @foreach ($persil->fotoPersil as $foto)
                             <div class="relative group">
                                 <img src="{{ asset('storage/' . $foto->file_path) }}" alt="Foto" class="w-full h-32 object-cover rounded">
-                                <form action="{{ route('admin.foto.delete', $foto->id) }}" method="POST" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded opacity-0 group-hover:opacity-100 transition" onclick="return confirm('Hapus foto ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-white text-sm">
+                                {{-- FIXED: Tidak pakai nested form, gunakan button dengan data attribute --}}
+                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded opacity-0 group-hover:opacity-100 transition">
+                                    <button type="button"
+                                        onclick="deleteFoto('{{ $foto->id }}', '{{ getAdminRoute('foto.delete', $foto->id) }}')"
+                                        class="text-white text-sm bg-red-600 px-3 py-1 rounded hover:bg-red-700">
                                         <i class="fas fa-trash"></i> Hapus
                                     </button>
-                                </form>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -357,54 +363,85 @@
             </div>
         </div>
 
-        <style>
-            #preview-container.hidden {
-                display: none;
-            }
-            #preview-container:not(.hidden) {
-                display: grid;
-            }
-        </style>
-
-        <script>
-            function previewFotos() {
-                const input = document.getElementById('foto_persil');
-                const container = document.getElementById('preview-container');
-                container.innerHTML = '';
-
-                if (input.files.length > 0) {
-                    container.classList.remove('hidden');
-                    Array.from(input.files).forEach((file, index) => {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const preview = document.createElement('div');
-                            preview.className = 'relative';
-                            preview.innerHTML = `
-                                <img src="${e.target.result}" class="w-full h-40 object-cover rounded-lg">
-                                <p class="text-gray-600 text-sm mt-1 truncate">${file.name}</p>
-                            `;
-                            container.appendChild(preview);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                } else {
-                    container.classList.add('hidden');
-                }
-            }
-        </script>
-
         <!-- Buttons -->
         <div class="flex space-x-4">
             <button
                 type="submit"
-                class="px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-medium"
+                class="px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-medium cursor-pointer"
             >
-                Update
+                <i class="fas fa-save mr-2"></i>Update
             </button>
-            <a href="{{ route('admin.persil.list') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-medium">
-                Batal
+            <a href="{{ getAdminRoute('persil.list') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-medium">
+                <i class="fas fa-times mr-2"></i>Batal
             </a>
         </div>
     </form>
 </div>
+
+{{-- Style dan Script dipindahkan ke luar form untuk menghindari masalah --}}
+<style>
+    #preview-container.hidden {
+        display: none;
+    }
+    #preview-container:not(.hidden) {
+        display: grid;
+    }
+</style>
+
+<script>
+    function previewFotos() {
+        const input = document.getElementById('foto_persil');
+        const container = document.getElementById('preview-container');
+        container.innerHTML = '';
+
+        if (input.files.length > 0) {
+            container.classList.remove('hidden');
+            Array.from(input.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.className = 'relative';
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-40 object-cover rounded-lg">
+                        <p class="text-gray-600 text-sm mt-1 truncate">${file.name}</p>
+                    `;
+                    container.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            container.classList.add('hidden');
+        }
+    }
+</script>
+
+{{-- Form untuk delete foto - di luar form utama untuk menghindari nested form --}}
+<form id="deleteFotoForm" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+
+<script>
+    // Function untuk delete foto tanpa nested form
+    function deleteFoto(fotoId, actionUrl) {
+        if (typeof showConfirmModal === 'function') {
+            showConfirmModal({
+                title: 'Hapus Foto',
+                message: 'Apakah Anda yakin ingin menghapus foto ini?',
+                type: 'delete',
+                confirmText: 'Ya, Hapus',
+                cancelText: 'Batal',
+                onConfirm: function() {
+                    const form = document.getElementById('deleteFotoForm');
+                    form.action = actionUrl;
+                    form.submit();
+                }
+            });
+        } else if (confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+            const form = document.getElementById('deleteFotoForm');
+            form.action = actionUrl;
+            form.submit();
+        }
+    }
+</script>
 @endsection

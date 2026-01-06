@@ -1,74 +1,157 @@
 @extends('layouts.user')
 
 @section('title', 'Data Persil')
-@section('page-title', 'Data Persil Saya')
+@section('page-title', 'Data Persil')
+@section('page-subtitle', 'Kelola dan pantau semua data persil Anda')
 
 @section('content')
-<div class="bg-white rounded-xl shadow-md p-6">
-    <!-- Search -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h3 class="text-lg font-semibold text-gray-800">
-            <i class="fas fa-map text-teal-600 mr-2"></i>
-            Daftar Persil
-        </h3>
-        <form action="{{ route('user.persil.list') }}" method="GET" class="flex gap-2">
-            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari kode, alamat, penggunaan..."
-                   class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 w-64">
-            <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">
+<div class="space-y-6">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden rounded-3xl gradient-secondary p-8 text-white">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold tracking-wide">
+                        <i class="fas fa-map mr-1"></i> DATA PERSIL
+                    </span>
+                </div>
+                <h2 class="text-3xl font-bold mb-2">Daftar Persil Anda</h2>
+                <p class="text-blue-100 max-w-lg">
+                    Lihat dan kelola semua data persil yang terdaftar atas nama Anda.
+                    Klik detail untuk informasi lengkap.
+                </p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-center px-6 py-4 bg-white/10 rounded-2xl backdrop-blur">
+                    <p class="text-4xl font-bold">{{ $persils->total() }}</p>
+                    <p class="text-blue-200 text-sm">Total Persil</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="glass rounded-2xl p-6 shadow-xl border border-white/50">
+        <form action="{{ route('user.persil.list') }}" method="GET" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" name="search" value="{{ $search ?? '' }}"
+                       placeholder="Cari berdasarkan kode, alamat, atau penggunaan..."
+                       class="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
+            </div>
+            <button type="submit" class="px-6 py-3 gradient-primary text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/30 transition font-medium flex items-center gap-2">
                 <i class="fas fa-search"></i>
+                <span>Cari</span>
             </button>
+            @if($search)
+            <a href="{{ route('user.persil.list') }}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-medium flex items-center gap-2">
+                <i class="fas fa-times"></i>
+                <span>Reset</span>
+            </a>
+            @endif
         </form>
     </div>
 
+    <!-- Persil Grid -->
     @if($persils->count() > 0)
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-700">No</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Kode Persil</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Penggunaan</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Luas (m²)</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Alamat</th>
-                    <th class="px-4 py-3 text-left font-semibold text-gray-700">RT/RW</th>
-                    <th class="px-4 py-3 text-center font-semibold text-gray-700">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                @foreach($persils as $index => $persil)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">{{ $persils->firstItem() + $index }}</td>
-                    <td class="px-4 py-3 font-mono text-blue-600 font-semibold">{{ $persil->kode_persil }}</td>
-                    <td class="px-4 py-3">
-                        <span class="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs">{{ $persil->penggunaan }}</span>
-                    </td>
-                    <td class="px-4 py-3">{{ number_format($persil->luas_m2, 2) }}</td>
-                    <td class="px-4 py-3 text-gray-600">{{ Str::limit($persil->alamat_lahan, 30) }}</td>
-                    <td class="px-4 py-3">{{ $persil->rt }}/{{ $persil->rw }}</td>
-                    <td class="px-4 py-3 text-center">
-                        <a href="{{ route('user.persil.detail', $persil->persil_id) }}"
-                           class="bg-teal-500 text-white px-3 py-1 rounded hover:bg-teal-600 text-sm">
-                            <i class="fas fa-eye mr-1"></i> Detail
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach($persils as $persil)
+        <div class="glass rounded-2xl shadow-xl border border-white/50 overflow-hidden card-hover group">
+            <!-- Card Header -->
+            <div class="p-6 gradient-primary text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div class="relative">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                            {{ $persil->penggunaan }}
+                        </span>
+                        <span class="text-teal-100 text-sm">
+                            RT {{ $persil->rt }}/RW {{ $persil->rw }}
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold font-mono">{{ $persil->kode_persil }}</h3>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-6 space-y-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-ruler-combined text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Luas Tanah</p>
+                        <p class="font-bold text-gray-800">{{ number_format($persil->luas_m2, 0, ',', '.') }} m²</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-map-marker-alt text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Alamat</p>
+                        <p class="font-medium text-gray-700">{{ Str::limit($persil->alamat_lahan, 40) }}</p>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-2 pt-4 border-t border-gray-100">
+                    <div class="text-center p-2 bg-blue-50 rounded-lg">
+                        <p class="text-lg font-bold text-blue-600">{{ $persil->dokumenPersil ? $persil->dokumenPersil->count() : 0 }}</p>
+                        <p class="text-xs text-gray-500">Dokumen</p>
+                    </div>
+                    <div class="text-center p-2 bg-violet-50 rounded-lg">
+                        <p class="text-lg font-bold text-violet-600">{{ $persil->petaPersil ? $persil->petaPersil->count() : 0 }}</p>
+                        <p class="text-xs text-gray-500">Peta</p>
+                    </div>
+                    <div class="text-center p-2 bg-amber-50 rounded-lg">
+                        <p class="text-lg font-bold text-amber-600">{{ $persil->sengketa ? $persil->sengketa->count() : 0 }}</p>
+                        <p class="text-xs text-gray-500">Sengketa</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="px-6 pb-6">
+                <a href="{{ route('user.persil.detail', $persil->persil_id) }}"
+                   class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition font-medium group-hover:shadow-lg group-hover:shadow-teal-500/30">
+                    <i class="fas fa-eye"></i>
+                    <span>Lihat Detail</span>
+                    <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                </a>
+            </div>
+        </div>
+        @endforeach
     </div>
 
     <!-- Pagination -->
-    <div class="mt-4">
+    <div class="glass rounded-2xl p-4 shadow-xl border border-white/50">
         {{ $persils->links() }}
     </div>
     @else
-    <div class="text-center py-12 text-gray-500">
-        <i class="fas fa-inbox text-5xl mb-4"></i>
-        <p class="text-lg">Belum ada data persil.</p>
+    <!-- Empty State -->
+    <div class="glass rounded-3xl p-12 shadow-xl border border-white/50 text-center">
+        <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-map text-gray-400 text-4xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Data Persil</h3>
+        <p class="text-gray-600 mb-6 max-w-md mx-auto">
+            @if($search)
+                Tidak ditemukan hasil untuk pencarian "<strong>{{ $search }}</strong>".
+                Coba kata kunci lain atau hapus filter.
+            @else
+                Anda belum memiliki data persil yang terdaftar.
+                Hubungi admin untuk mendaftarkan persil Anda.
+            @endif
+        </p>
         @if($search)
-        <p class="text-sm mt-2">Tidak ditemukan hasil untuk "{{ $search }}"</p>
-        <a href="{{ route('user.persil.list') }}" class="text-teal-600 hover:underline mt-2 inline-block">
-            <i class="fas fa-times mr-1"></i> Hapus filter
+        <a href="{{ route('user.persil.list') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-medium">
+            <i class="fas fa-times"></i>
+            <span>Hapus Filter</span>
         </a>
         @endif
     </div>

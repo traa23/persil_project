@@ -7,7 +7,8 @@
 <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
     <h3 class="text-lg font-bold text-gray-800 mb-4">Persil: {{ $persil->kode_persil }}</h3>
 
-    <form action="{{ route('admin.dokumen.store', $persil->persil_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    {{-- OLD: route('admin.dokumen.store', $persil->persil_id) --}}
+    <form action="{{ getAdminRoute('dokumen.store', $persil->persil_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
 
         <!-- Jenis Dokumen -->

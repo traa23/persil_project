@@ -5,7 +5,8 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-    <form action="{{ route('admin.user.store') }}" method="POST" class="space-y-6">
+    {{-- OLD: action="{{ route('admin.user.store') }}" --}}
+    <form action="{{ getAdminRoute('user.store') }}" method="POST" class="space-y-6">
         @csrf
 
         <!-- Role Selection -->
@@ -13,33 +14,52 @@
             <label class="block text-sm font-medium text-gray-700 mb-3">
                 Pilih Role <span class="text-red-500">*</span>
             </label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {{-- Super Admin hanya bisa dibuat oleh Super Admin --}}
+                @if(auth()->user()->role == 'super_admin')
+                <!-- Super Admin Card -->
+                <label class="relative cursor-pointer">
+                    <input type="radio" name="role" value="super_admin" class="hidden peer" {{ old('role') == 'super_admin' ? 'checked' : '' }}>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-red-500 transition peer-checked:border-red-600 peer-checked:bg-red-50"
+                         id="superAdminCard">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fas fa-shield-alt text-red-600 text-2xl"></i>
+                            <h3 class="text-lg font-bold text-gray-800">Super Admin</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">
+                            Akses penuh ke semua fitur dan manajemen sistem.
+                        </p>
+                    </div>
+                </label>
+                @endif
+
                 <!-- Admin Card -->
                 <label class="relative cursor-pointer">
-                    <input type="radio" name="role" value="admin" class="hidden" onchange="updateRoleInfo()">
-                    <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-purple-500 transition has-checked:border-purple-600 has-checked:bg-purple-50"
+                    <input type="radio" name="role" value="admin" class="hidden peer" {{ old('role') == 'admin' ? 'checked' : '' }}>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-purple-500 transition peer-checked:border-purple-600 peer-checked:bg-purple-50"
                          id="adminCard">
                         <div class="flex items-center gap-3 mb-2">
                             <i class="fas fa-crown text-purple-600 text-2xl"></i>
                             <h3 class="text-lg font-bold text-gray-800">Admin</h3>
                         </div>
                         <p class="text-gray-600 text-sm">
-                            User dengan akses penuh ke sistem. Bisa membuat dan mengelola guest user.
+                            User dengan akses penuh ke sistem. Bisa membuat dan mengelola user.
                         </p>
                     </div>
                 </label>
 
-                <!-- Guest Card -->
+                <!-- User/Warga Card -->
+                {{-- OLD: value="guest" - tapi di database role-nya adalah 'user' --}}
                 <label class="relative cursor-pointer">
-                    <input type="radio" name="role" value="guest" class="hidden" onchange="updateRoleInfo()">
-                    <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition has-checked:border-blue-600 has-checked:bg-blue-50"
-                         id="guestCard">
+                    <input type="radio" name="role" value="user" class="hidden peer" {{ old('role', 'user') == 'user' ? 'checked' : '' }}>
+                    <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-blue-500 transition peer-checked:border-blue-600 peer-checked:bg-blue-50"
+                         id="userCard">
                         <div class="flex items-center gap-3 mb-2">
                             <i class="fas fa-user text-blue-600 text-2xl"></i>
-                            <h3 class="text-lg font-bold text-gray-800">Guest</h3>
+                            <h3 class="text-lg font-bold text-gray-800">Warga</h3>
                         </div>
                         <p class="text-gray-600 text-sm">
-                            User terbatas. Hanya bisa melihat data persil yang ditugaskan.
+                            User terbatas. Hanya bisa melihat data persil yang dimiliki.
                         </p>
                     </div>
                 </label>
@@ -125,52 +145,13 @@
             >
                 <i class="fas fa-save mr-2"></i>Buat User
             </button>
-            <a href="{{ route('admin.dashboard') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-medium transition">
+            {{-- OLD: href="{{ route('admin.dashboard') }}" --}}
+            <a href="{{ getAdminRoute('user.list') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-medium transition">
                 <i class="fas fa-times mr-2"></i>Batal
             </a>
         </div>
     </form>
 </div>
 
-<style>
-    /* Style for checked radio buttons */
-    input[type="radio"]:checked + div {
-        border-color: currentColor !important;
-        background-color: rgba(0, 0, 0, 0.02) !important;
-    }
-
-    #adminCard {
-        --tw-border-opacity: 1;
-    }
-
-    input[value="admin"]:checked + #adminCard {
-        @apply border-purple-600 bg-purple-50;
-    }
-
-    input[value="guest"]:checked + #guestCard {
-        @apply border-blue-600 bg-blue-50;
-    }
-</style>
-
-<script>
-    function updateRoleInfo() {
-        const adminCard = document.getElementById('adminCard');
-        const guestCard = document.getElementById('guestCard');
-        const adminRadio = document.querySelector('input[value="admin"]');
-        const guestRadio = document.querySelector('input[value="guest"]');
-
-        if (adminRadio.checked) {
-            adminCard.classList.add('border-purple-600', 'bg-purple-50');
-            guestCard.classList.remove('border-blue-600', 'bg-blue-50');
-        } else {
-            guestCard.classList.add('border-blue-600', 'bg-blue-50');
-            adminCard.classList.remove('border-purple-600', 'bg-purple-50');
-        }
-    }
-
-    // Initialize on load
-    document.addEventListener('DOMContentLoaded', function() {
-        updateRoleInfo();
-    });
-</script>
+{{-- OLD: Custom JS for radio styling - now using Tailwind peer classes --}}
 @endsection

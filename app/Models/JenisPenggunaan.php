@@ -17,6 +17,6 @@ class JenisPenggunaan extends Model
 
     public function persil()
     {
-        return $this->hasMany(Persil::class, 'jenis_id', 'jenis_id');
+        return $this->hasMany(Persil::class, 'penggunaan', 'nama_penggunaan');
     }
 }

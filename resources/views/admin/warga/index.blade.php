@@ -48,6 +48,9 @@
                         <td class="px-4 py-3">{{ $warga->pekerjaan }}</td>
                         <td class="px-4 py-3">{{ $warga->telp ?? '-' }}</td>
                         <td class="px-4 py-3 text-center">
+                            <a href="{{ getAdminRoute('warga.detail', $warga->warga_id) }}" class="text-purple-600 hover:text-purple-700 hover:scale-110 transition mr-2" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </a>
                             <a href="{{ getAdminRoute('warga.edit', $warga->warga_id) }}" class="text-blue-600 hover:text-blue-700 hover:scale-110 transition" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
@@ -80,10 +83,16 @@
 </div>
 
 <script>
+{{-- OLD:
 function confirmDeleteWarga(id) {
     if (confirm('Apakah Anda yakin ingin menghapus data warga ini?')) {
         document.getElementById('wargaDeleteForm-' + id).submit();
     }
+}
+--}}
+// NEW: Menggunakan confirmDelete dari confirm-modal.blade.php
+function confirmDeleteWarga(id) {
+    confirmDelete('wargaDeleteForm-' + id, 'Apakah Anda yakin ingin menghapus data warga ini?');
 }
 </script>
 @endsection

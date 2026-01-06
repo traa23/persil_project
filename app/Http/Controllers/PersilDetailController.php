@@ -21,19 +21,41 @@ class PersilDetailController extends Controller
         $persil = Persil::findOrFail($persilId);
 
         $validated = $request->validate([
-            'jenis_dokumen' => 'required',
-            'nomor'         => 'nullable',
-            'keterangan'    => 'nullable',
-            'file_dokumen'  => 'nullable|file|max:5120',
+            'jenis_dokumen'  => 'required',
+            'nomor'          => 'nullable',
+            'keterangan'     => 'nullable',
+            'file_dokumen'   => 'nullable|array',
+            'file_dokumen.*' => 'nullable|file|max:5120|mimes:pdf,jpg,jpeg,png,gif,doc,docx,xls,xlsx',
         ]);
 
-        $validated['persil_id'] = $persilId;
-
+        // Handle multiple file uploads - create one dokumen record per file
         if ($request->hasFile('file_dokumen')) {
-            $validated['file_dokumen'] = $request->file('file_dokumen')->store('dokumen', 'public');
+            $files = $request->file('file_dokumen');
+
+            foreach ($files as $index => $file) {
+                $filePath = $file->store('dokumen', 'public');
+
+                DokumenPersil::create([
+                    'persil_id'     => $persilId,
+                    'jenis_dokumen' => $validated['jenis_dokumen'],
+                    'nomor'         => $validated['nomor'],
+                    'keterangan'    => $validated['keterangan'],
+                    'file_dokumen'  => $filePath,
+                ]);
+            }
+
+            $count = count($files);
+            return redirect()->back()->with('success', "{$count} dokumen berhasil ditambahkan");
         }
 
-        DokumenPersil::create($validated);
+        // If no file uploaded, still create the record
+        DokumenPersil::create([
+            'persil_id'     => $persilId,
+            'jenis_dokumen' => $validated['jenis_dokumen'],
+            'nomor'         => $validated['nomor'],
+            'keterangan'    => $validated['keterangan'],
+            'file_dokumen'  => null,
+        ]);
 
         return redirect()->back()->with('success', 'Dokumen berhasil ditambahkan');
     }
@@ -167,5 +189,87 @@ class PersilDetailController extends Controller
         $sengketa->delete();
 
         return redirect()->back()->with('success', 'Data sengketa berhasil dihapus');
+    }
+
+    // =====================
+    // DOKUMEN EDIT/UPDATE
+    // =====================
+    public function dokumenEdit($dokumenId)
+    {
+        $dokumen = DokumenPersil::findOrFail($dokumenId);
+        $persil  = $dokumen->persil;
+
+        return view('admin.persil.dokumen.edit', compact('dokumen', 'persil'));
+    }
+
+    public function dokumenUpdate(Request $request, $dokumenId)
+    {
+        $dokumen = DokumenPersil::findOrFail($dokumenId);
+
+        $validated = $request->validate([
+            'jenis_dokumen' => 'required',
+            'nomor'         => 'nullable',
+            'keterangan'    => 'nullable',
+            'file_dokumen'  => 'nullable|file|max:5120|mimes:pdf,jpg,jpeg,png,gif,doc,docx,xls,xlsx',
+        ]);
+
+        if ($request->hasFile('file_dokumen')) {
+            // Delete old file if exists
+            if ($dokumen->file_dokumen) {
+                \Storage::disk('public')->delete($dokumen->file_dokumen);
+            }
+            $validated['file_dokumen'] = $request->file('file_dokumen')->store('dokumen', 'public');
+        }
+
+        $dokumen->update($validated);
+
+        return redirect()->back()->with('success', 'Dokumen berhasil diperbarui');
+    }
+
+    // =====================
+    // PETA EDIT/DELETE
+    // =====================
+    public function petaEdit($petaId)
+    {
+        $peta   = PetaPersil::findOrFail($petaId);
+        $persil = $peta->persil;
+
+        return view('admin.persil.peta.edit', compact('peta', 'persil'));
+    }
+
+    public function petaUpdate(Request $request, $petaId)
+    {
+        $peta = PetaPersil::findOrFail($petaId);
+
+        $validated = $request->validate([
+            'geojson'   => 'nullable',
+            'panjang_m' => 'nullable|numeric',
+            'lebar_m'   => 'nullable|numeric',
+            'file_peta' => 'nullable|file|max:5120',
+        ]);
+
+        if ($request->hasFile('file_peta')) {
+            if ($peta->file_peta) {
+                \Storage::disk('public')->delete($peta->file_peta);
+            }
+            $validated['file_peta'] = $request->file('file_peta')->store('peta', 'public');
+        }
+
+        $peta->update($validated);
+
+        return redirect()->back()->with('success', 'Peta berhasil diperbarui');
+    }
+
+    public function petaDelete($petaId)
+    {
+        $peta = PetaPersil::findOrFail($petaId);
+
+        if ($peta->file_peta) {
+            \Storage::disk('public')->delete($peta->file_peta);
+        }
+
+        $peta->delete();
+
+        return redirect()->back()->with('success', 'Peta berhasil dihapus');
     }
 }

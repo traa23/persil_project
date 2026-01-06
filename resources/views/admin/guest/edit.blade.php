@@ -5,7 +5,8 @@
 
 @section('content')
 <div class="bg-white rounded-lg shadow p-6 max-w-md">
-    <form action="{{ route('admin.guest.update', $guest->id) }}" method="POST" class="space-y-6">
+    {{-- OLD: route('admin.guest.update', $guest->id) --}}
+    <form action="{{ getAdminRoute('guest.update', $guest->id) }}" method="POST" class="space-y-6">
         @csrf
         @method('PUT')
 
@@ -83,7 +84,8 @@
             >
                 Update
             </button>
-            <a href="{{ route('admin.guest.list') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-medium">
+            {{-- OLD: route('admin.guest.list') --}}
+            <a href="{{ getAdminRoute('guest.list') }}" class="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-medium">
                 Batal
             </a>
         </div>

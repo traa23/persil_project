@@ -93,7 +93,8 @@
     @endif
 
     <div class="mt-6 pt-6 border-t">
-        <a href="{{ route('admin.persil.list') }}" class="text-purple-600 hover:text-purple-800 font-bold text-base transition">
+        {{-- OLD: route('admin.persil.list') --}}
+        <a href="{{ getAdminRoute('persil.list') }}" class="text-purple-600 hover:text-purple-800 font-bold text-base transition">
             Lihat semua data persil <i class="fas fa-arrow-right ml-2"></i>
         </a>
     </div>

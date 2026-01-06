@@ -54,7 +54,7 @@ class Persil extends Model
 
     public function petaPersil()
     {
-        return $this->hasOne(PetaPersil::class, 'persil_id', 'persil_id');
+        return $this->hasMany(PetaPersil::class, 'persil_id', 'persil_id');
     }
 
     public function sengketa()
@@ -87,8 +87,9 @@ class Persil extends Model
         }
 
         // Priority 3: From peta media
-        if ($this->petaPersil) {
-            $mediaPeta = $this->petaPersil->media()->first();
+        $petaPersil = $this->petaPersil()->first();
+        if ($petaPersil) {
+            $mediaPeta = $petaPersil->media()->first();
             if ($mediaPeta) {
                 return $mediaPeta->file_url;
             }

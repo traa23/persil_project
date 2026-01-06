@@ -72,7 +72,8 @@
                             <form id="deleteForm-{{ $persil->persil_id }}" action="{{ getAdminRoute('persil.delete', $persil->persil_id) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" onclick="showConfirm('Hapus persil {{ $persil->kode_persil }}?', document.getElementById('deleteForm-{{ $persil->persil_id }}'))" class="text-red-600 hover:text-red-700 hover:scale-110 transition" title="Hapus">
+                                {{-- OLD: showConfirm('Hapus persil ...?', document.getElementById('deleteForm-...')) --}}
+                                <button type="button" onclick="confirmDelete('deleteForm-{{ $persil->persil_id }}', 'Hapus persil {{ $persil->kode_persil }}?')" class="text-red-600 hover:text-red-700 hover:scale-110 transition" title="Hapus">
                                     <i class="fas fa-trash text-lg"></i>
                                 </button>
                             </form>

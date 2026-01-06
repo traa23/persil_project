@@ -7,7 +7,8 @@
 <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
     <h3 class="text-lg font-bold text-gray-800 mb-4">Persil: {{ $persil->kode_persil }}</h3>
 
-    <form action="{{ route('admin.sengketa.update', $sengketa->sengketa_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    {{-- OLD: route('admin.sengketa.update', $sengketa->sengketa_id) --}}
+    <form action="{{ getAdminRoute('sengketa.update', $sengketa->sengketa_id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')
 
@@ -134,10 +135,11 @@
             >
                 Update
             </button>
-            <form action="{{ route('admin.sengketa.delete', $sengketa->sengketa_id) }}" method="POST" class="inline-block" onclick="return confirm('Yakin ingin menghapus?')">
+            {{-- OLD: route('admin.sengketa.delete', $sengketa->sengketa_id) --}}
+            <form id="sengketaDeleteForm" action="{{ getAdminRoute('sengketa.delete', $sengketa->sengketa_id) }}" method="POST" class="inline-block">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium">
+                <button type="button" onclick="confirmDelete('sengketaDeleteForm', 'Yakin ingin menghapus data sengketa ini?')" class="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium">
                     Hapus
                 </button>
             </form>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="30">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard') - Sistem Persil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -104,39 +104,75 @@
 
             <!-- Logo -->
             <div class="mb-8 mt-8 lg:mt-0">
-                <h2 class="text-2xl font-bold">Persil</h2>
-                <p class="text-gray-400 text-sm">Admin Panel</p>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-home text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">Bina Desa</h2>
+                        <p class="text-gray-400 text-xs">Admin Panel</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Navigation Menu -->
-            <nav class="space-y-2">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.dashboard') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
-                    <i class="fas fa-home"></i>
+            <nav class="space-y-1">
+                <!-- Dashboard -->
+                <a href="{{ getAdminRoute('dashboard') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-sm {{ request()->routeIs('*.dashboard') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                    <i class="fas fa-tachometer-alt w-5"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{{ route('admin.persil.list') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.persil.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
-                    <i class="fas fa-map"></i>
-                    <span>Data Persil</span>
-                </a>
+                <!-- Data Master Section -->
+                <div class="pt-4">
+                    <p class="px-4 text-xs text-gray-500 uppercase tracking-wider mb-2">Data Master</p>
+                    <a href="{{ getAdminRoute('warga.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.warga.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-users w-5"></i>
+                        <span>Data Warga</span>
+                    </a>
+                    <a href="{{ getAdminRoute('persil.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.persil.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-th-large w-5"></i>
+                        <span>Data Persil</span>
+                    </a>
+                </div>
 
-                <a href="{{ route('admin.warga.list') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.warga.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
-                    <i class="fas fa-id-card"></i>
-                    <span>Kelola Warga</span>
-                </a>
+                <!-- Pertanahan Section -->
+                <div class="pt-4">
+                    <p class="px-4 text-xs text-gray-500 uppercase tracking-wider mb-2">Pertanahan</p>
+                    <a href="{{ getAdminRoute('dokumen.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.dokumen.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-file-alt w-5"></i>
+                        <span>Dokumen Persil</span>
+                    </a>
+                    <a href="{{ getAdminRoute('peta.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.peta.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-map w-5"></i>
+                        <span>Peta Persil</span>
+                    </a>
+                    <a href="{{ getAdminRoute('sengketa.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.sengketa.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-gavel w-5"></i>
+                        <span>Sengketa Persil</span>
+                    </a>
+                    <a href="{{ getAdminRoute('jenis-penggunaan.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.jenis-penggunaan.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-tags w-5"></i>
+                        <span>Jenis Penggunaan</span>
+                    </a>
+                </div>
 
-                <a href="{{ route('admin.user.create') }}" class="flex items-center space-x-3 px-4 py-3 rounded font-medium text-base {{ request()->routeIs('admin.user.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Buat User</span>
-                </a>
+                <!-- User Management Section -->
+                <div class="pt-4">
+                    <p class="px-4 text-xs text-gray-500 uppercase tracking-wider mb-2">User</p>
+                    <a href="{{ getAdminRoute('user.list') }}" class="flex items-center space-x-3 px-4 py-2 rounded text-sm {{ request()->routeIs('*.user.*') ? 'bg-purple-600' : 'hover:bg-gray-800' }} transition">
+                        <i class="fas fa-user-cog w-5"></i>
+                        <span>User Management</span>
+                    </a>
+                </div>
             </nav>
 
             <!-- Logout -->
             <div class="mt-8 pt-8 border-t border-gray-700">
                 <form action="{{ route('logout') }}" method="POST" id="logoutForm">
                     @csrf
-                    <button type="button" class="flex items-center space-x-3 px-4 py-3 rounded w-full hover:bg-gray-800 font-medium text-base transition" onclick="confirmLogout()">
-                        <i class="fas fa-sign-out-alt"></i>
+                    <button type="button" class="flex items-center space-x-3 px-4 py-3 rounded w-full hover:bg-gray-800 font-medium text-sm transition" onclick="confirmLogout()">
+                        <i class="fas fa-sign-out-alt w-5"></i>
                         <span>Logout</span>
                     </button>
                 </form>
@@ -158,6 +194,7 @@
                 <!-- User Info -->
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-600 hidden sm:inline">{{ auth()->user()->name }}</span>
+                    <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium hidden sm:inline">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</span>
                     <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {{ substr(auth()->user()->name, 0, 1) }}
                     </div>
@@ -173,91 +210,55 @@
 
     <!-- JAVASCRIPT FOR HAMBURGER MENU -->
     <script>
-        /**
-         * HAMBURGER MENU FUNCTIONALITY
-         * ================================
-         * Untuk mobile (Android/iOS):
-         * - Klik icon garis 3 (hamburger) untuk buka sidebar
-         * - Klik overlay gelap atau tombol close untuk tutup sidebar
-         *
-         * Untuk desktop:
-         * - Sidebar selalu visible (tidak ada hamburger menu)
-         */
-
-        // Get DOM elements
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const openSidebarBtn = document.getElementById('openSidebarBtn');
         const closeSidebarBtn = document.getElementById('closeSidebarBtn');
 
-        // FUNCTION 1: Buka sidebar
-        // Saat hamburger menu (icon garis 3) diklik di mobile
         function openSidebar() {
             sidebar.classList.add('active');
             sidebarOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling saat sidebar open
+            document.body.style.overflow = 'hidden';
         }
 
-        // FUNCTION 2: Tutup sidebar
-        // Saat overlay diklik atau close button diklik di mobile
         function closeSidebar() {
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto'; // Enable scrolling
+            document.body.style.overflow = 'auto';
         }
 
-        // FUNCTION 3: Toggle sidebar
-        // Saat hamburger button diklik
-        function toggleSidebar() {
-            if (sidebar.classList.contains('active')) {
-                closeSidebar();
-            } else {
-                openSidebar();
-            }
-        }
-
-        // EVENT LISTENERS
-        // ===============
-
-        // Buka sidebar saat hamburger button diklik
         openSidebarBtn?.addEventListener('click', openSidebar);
-
-        // Tutup sidebar saat close button diklik
         closeSidebarBtn?.addEventListener('click', closeSidebar);
-
-        // Tutup sidebar saat overlay diklik (dark background)
         sidebarOverlay?.addEventListener('click', closeSidebar);
 
-        // Tutup sidebar saat menu item diklik (untuk UX yang lebih baik)
         const menuLinks = sidebar?.querySelectorAll('nav a');
         menuLinks?.forEach(link => {
             link.addEventListener('click', closeSidebar);
         });
 
-        // Tutup sidebar saat window di-resize ke desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
                 closeSidebar();
             }
         });
 
-        // Konfirmasi logout
+        /*
+        ========================================
+        OLD LOGOUT FUNCTION (COMMENTED OUT)
+        ========================================
         function confirmLogout() {
-            // Show beautiful logout confirmation modal
             const modal = document.createElement('div');
             modal.id = 'logoutModal';
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
-                <div class="bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 p-6 transform transition-all duration-300 scale-100">
+                <div class="bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 p-6">
                     <div class="flex justify-center mb-4">
                         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
                             <i class="fas fa-sign-out-alt text-red-600 text-2xl"></i>
                         </div>
                     </div>
-
                     <h3 class="text-xl font-bold text-center text-gray-800 mb-2">Konfirmasi Logout</h3>
                     <p class="text-center text-gray-600 mb-6">Apakah Anda yakin ingin keluar dari akun ini?</p>
-
                     <div class="flex gap-3">
                         <button onclick="document.getElementById('logoutModal').remove()" class="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-medium transition">
                             <i class="fas fa-times mr-2"></i>Batal
@@ -275,6 +276,9 @@
                 }
             });
         }
+        */
+
+        // NEW: confirmLogout is now defined in confirm-modal.blade.php with 2-step verification
     </script>
 </body>
 </html>
